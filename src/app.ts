@@ -5,8 +5,16 @@ class App {
 	static workarea:WorkArea;
 	static current_card:Card;
 	constructor(deck?:Deck) {
+		deck ? App.load_deck(deck) : App.load_deck(App.get_default_deck());
+	}
+	static unload_deck() {
+		if (this.sidebar) this.sidebar.unload();
+		if (this.workarea) this.workarea.unload();
+	}
+	static load_deck(deck:Deck) {
+		this.unload_deck();
 		// init deck
-		App.deck = deck ? deck : App.get_default_deck();
+		App.deck = deck;
 		// init app
 		App.topbar = new TopBar();
 		App.sidebar = new SideBar();
@@ -37,6 +45,6 @@ class App {
 		}
 	}
 	static get_json() {
-		return JSON.stringify(App.deck, null, 2);
+		return JSON.stringify(App.deck, null, 4);
 	}
 }

@@ -53,4 +53,8 @@ class WorkArea {
 		this.pos_info.innerText = this.contents.selectionStart + '';
 		requestAnimationFrame(() => this.update_pos_info());
 	}
+	unload () {
+		this.title.value = '';
+		this.contents.value = '';
+	}
 }

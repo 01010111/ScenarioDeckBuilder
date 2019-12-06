@@ -1,8 +1,18 @@
 "use strict";
 var App = /** @class */ (function () {
     function App(deck) {
+        deck ? App.load_deck(deck) : App.load_deck(App.get_default_deck());
+    }
+    App.unload_deck = function () {
+        if (this.sidebar)
+            this.sidebar.unload();
+        if (this.workarea)
+            this.workarea.unload();
+    };
+    App.load_deck = function (deck) {
+        this.unload_deck();
         // init deck
-        App.deck = deck ? deck : App.get_default_deck();
+        App.deck = deck;
         // init app
         App.topbar = new TopBar();
         App.sidebar = new SideBar();
@@ -14,7 +24,7 @@ var App = /** @class */ (function () {
         }
         if (CardTab.all.length > 0)
             CardTab.all[0].select();
-    }
+    };
     App.get_default_deck = function () {
         return {
             theme: 'legacy',
@@ -37,7 +47,7 @@ var App = /** @class */ (function () {
         };
     };
     App.get_json = function () {
-        return JSON.stringify(App.deck, null, 2);
+        return JSON.stringify(App.deck, null, 4);
     };
     return App;
 }());
@@ -56,7 +66,7 @@ var CardTab = /** @class */ (function () {
         return this;
     };
     CardTab.prototype.select = function () {
-        var card = DeckUtil.get_card(this.title);
+        var card = Util.get_card(this.title);
         if (!card)
             return;
         App.current_card = card;
@@ -75,18 +85,45 @@ var CardTab = /** @class */ (function () {
     CardTab.all = [];
     return CardTab;
 }());
-var DeckUtil = /** @class */ (function () {
-    function DeckUtil() {
-    }
-    DeckUtil.get_card = function (title) {
-        for (var _i = 0, _a = App.deck.deck; _i < _a.length; _i++) {
-            var card = _a[_i];
-            if (card.title == title)
-                return card;
+var Modal = /** @class */ (function () {
+    function Modal(options) {
+        var _this = this;
+        // options
+        if (!options.cancel)
+            options.cancel = 'Cancel';
+        // container
+        this.container = document.createElement('div');
+        this.container.classList.add('modal_container');
+        // modal
+        var modal = document.createElement('div');
+        modal.classList.add('modal');
+        this.container.appendChild(modal);
+        // title
+        var title = document.createElement('h1');
+        title.innerText = options.title;
+        modal.appendChild(title);
+        // content
+        modal.appendChild(options.content);
+        // buttons
+        var cancel = document.createElement('div');
+        cancel.classList.add('button', 'bottom', 'secondary');
+        cancel.innerText = options.cancel;
+        cancel.onclick = function () { return _this.close(); };
+        if (options.confirm && options.on_confirm) {
+            var confirm_1 = document.createElement('div');
+            confirm_1.classList.add('button', 'bottom');
+            confirm_1.innerText = options.confirm;
+            confirm_1.onclick = function () { return options.on_confirm(); };
+            modal.appendChild(confirm_1);
         }
-        return null;
+        modal.appendChild(cancel);
+        // add to body
+        document.body.appendChild(this.container);
+    }
+    Modal.prototype.close = function () {
+        this.container.remove();
     };
-    return DeckUtil;
+    return Modal;
 }());
 var SideBar = /** @class */ (function () {
     function SideBar() {
@@ -106,10 +143,15 @@ var SideBar = /** @class */ (function () {
     SideBar.prototype.add_new_card = function (card) {
         new CardTab(card.title).add();
     };
+    SideBar.prototype.unload = function () {
+        for (var i = this.element.children.length - 1; i > 0; i--) {
+            this.element.children[i].remove();
+        }
+    };
     SideBar.get_unused_title = function () {
         var title = 'My Card  ';
         var n = 0;
-        while (DeckUtil.get_card(title.trim())) {
+        while (Util.get_card(title.trim())) {
             n++;
             title = title.substring(0, 8) + n;
         }
@@ -124,8 +166,41 @@ var TopBar = /** @class */ (function () {
         this.title_input = document.getElementById('title_input');
         this.title_input.value = App.deck.title;
         this.title_input.oninput = function () { return App.deck.title = _this.title_input.value; };
+        this.export = document.getElementById('export');
+        this.export.onclick = function () { return _this.make_export_modal(); };
     }
+    TopBar.prototype.make_export_modal = function () {
+        var content = document.createElement('div');
+        var code = document.createElement('pre');
+        code.innerText = App.get_json();
+        code.onclick = function () { return Util.select_text(code); };
+        content.appendChild(code);
+        var instructions = document.createElement('p');
+        instructions.innerText = 'Press CTRL+C to copy!';
+        content.appendChild(instructions);
+        new Modal({ content: content, title: 'Export' });
+        Util.select_text(code);
+    };
     return TopBar;
+}());
+var Util = /** @class */ (function () {
+    function Util() {
+    }
+    Util.get_card = function (title) {
+        for (var _i = 0, _a = App.deck.deck; _i < _a.length; _i++) {
+            var card = _a[_i];
+            if (card.title == title)
+                return card;
+        }
+        return null;
+    };
+    Util.select_text = function (node) {
+        var range = document.createRange();
+        range.selectNode(node);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+    };
+    return Util;
 }());
 var Validation = /** @class */ (function () {
     function Validation() {
@@ -228,6 +303,10 @@ var WorkArea = /** @class */ (function () {
         var _this = this;
         this.pos_info.innerText = this.contents.selectionStart + '';
         requestAnimationFrame(function () { return _this.update_pos_info(); });
+    };
+    WorkArea.prototype.unload = function () {
+        this.title.value = '';
+        this.contents.value = '';
     };
     return WorkArea;
 }());

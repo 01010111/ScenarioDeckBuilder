@@ -7,6 +7,11 @@
 	color: #322;
 }
 
+h1 {
+	font-size: 24px;
+	font-weight: normal;
+}
+
 .top_bar {
 	height: 80px;
 	box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
@@ -16,6 +21,34 @@
 	padding: 8px;
 	border: 0;
 	font-size: 24px;
+	width: 50%;
+}
+.button {
+	background-color:#48F;
+	padding: 16px 32px;
+	color: white;
+	border-radius: 4px;
+	margin: 12px 32px;
+	float: right;
+	box-shadow: 0 4px 0 #24D;
+	border-top: 1px solid #8DF;
+	cursor: pointer;
+	text-align: center;
+}
+.button.secondary {
+	background-color:#FFF;
+	padding: 16px;
+	color: #48F;
+	border-radius: 4px;
+	margin: 12px;
+	float: right;
+	box-shadow: none;
+	border-top: none;
+	text-decoration: underline;
+}
+.button.bottom {
+	position: relative;
+	float: right;
 }
 
 .app_container {
@@ -72,6 +105,7 @@
 	margin-bottom: 16px;
 	box-shadow: 0 0 16px rgba(0, 0, 0, 0.05);
 	border-radius: 4px;
+	cursor: pointer;
 }
 .card_tab.selected {
 	margin-right: -16px;
@@ -104,5 +138,39 @@
     width: 128px;
     text-align: center;
     margin-left: 96px;
-    font-size: 34px;
+	font-size: 34px;
+	cursor: pointer;
+}
+
+.modal_container {
+	position: fixed; /* Stay in place */
+	z-index: 1; /* Sit on top */
+	left: 0;
+	top: 0;
+	width: 100%; /* Full width */
+	height: 100%; /* Full height */
+	overflow: auto; /* Enable scroll if needed */
+	background-color: rgba(255, 255, 255, 0.9); /* Black w/ opacity */
+}
+
+.modal {
+	width: 50vw;
+	margin: 10vh auto;
+	background-color: white;
+	box-shadow: 0 0 32px rgba(0, 0, 0, 0.1);
+	border-radius: 4px;
+	padding: 48px 64px;
+	display: table;
+}
+.modal * {
+	margin: 16px 0;
+}
+.modal pre {
+	border: 1px dashed black;
+	padding: 16px;
+	border-radius: 16px;
+}
+
+pre {
+	font-family: monospace;
 }

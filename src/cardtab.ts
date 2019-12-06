@@ -15,7 +15,7 @@ class CardTab {
 		return this;
 	}
 	select() {
-		let card = DeckUtil.get_card(this.title);
+		let card = Util.get_card(this.title);
 		if (!card) return;
 		App.current_card = card;
 		for (let tab of CardTab.all) tab.element.classList.remove('selected');

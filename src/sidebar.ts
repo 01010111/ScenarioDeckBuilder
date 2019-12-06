@@ -17,10 +17,15 @@ class SideBar {
 	add_new_card(card:Card) {
 		new CardTab(card.title).add();
 	}
+	unload() {
+		for (let i = this.element.children.length - 1; i > 0; i--) {
+			this.element.children[i].remove();
+		}  
+	}
 	static get_unused_title():string {
 		let title = 'My Card  ';
 		let n = 0;
-		while (DeckUtil.get_card(title.trim())) {
+		while (Util.get_card(title.trim())) {
 			n++;
 			title = title.substring(0, 8) + n;
 		}
