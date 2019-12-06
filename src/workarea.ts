@@ -76,7 +76,8 @@ class WorkArea {
 		if (App.deck.deck.length <= 1) return alert('A deck must have at least one card!');
 		if (!this.current_card_tab) return;
 		App.sidebar.delete_card(this.current_card_tab.title);
-		App.deck.deck.splice(App.deck.deck.indexOf(Util.get_card(this.current_card_tab.title) as Card));
+		App.deck.deck.splice(App.deck.deck.indexOf(Util.get_card(this.current_card_tab.title) as Card), 1);
+		App.sidebar.all_tabs[0].select();
 	}
 	unload () {
 		this.title.value = '';
