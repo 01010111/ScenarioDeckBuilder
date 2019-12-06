@@ -22,7 +22,7 @@ class App {
 		App.topbar.load();
 		// add existing cards
 		for (let card of App.deck.deck) App.sidebar.add_new_card(card);
-		if (CardTab.all.length > 0) CardTab.all[0].select();
+		if (App.sidebar.all_tabs.length > 0) App.sidebar.all_tabs[0].select();
 	}
 	static get_default_deck():Deck {
 		return {

@@ -1,6 +1,7 @@
 class SideBar {
 	element:HTMLDivElement;
 	add_card:HTMLDivElement;
+	all_tabs:CardTab[] = [];
 	constructor() {
 		this.element = document.getElementById('sidebar') as HTMLDivElement;
 		this.add_card = document.getElementById('add_card') as HTMLDivElement;
@@ -15,10 +16,10 @@ class SideBar {
 		}
 	}
 	add_new_card(card:Card) {
-		new CardTab(card.title).add();
+		this.all_tabs.push(new CardTab(card.title).add());
 	}
 	unload() {
-		CardTab.all = [];
+		this.all_tabs = [];
 		while(this.element.firstChild != this.add_card) if (this.element.firstChild) this.element.firstChild.remove();
 	}
 	static get_unused_title():string {
