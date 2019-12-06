@@ -15,6 +15,7 @@ h1 {
 .top_bar {
 	height: 80px;
 	box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(0, 0, 0, 0.1);
 }
 .top_bar input {
 	margin: 16px;
@@ -70,8 +71,6 @@ h1 {
 .workarea {
 	width: calc(100% - 256px);
 	padding: 32px;
-	display: flex;
-	flex-direction: column;
 }
 .workarea input {
 	margin: 16px;
@@ -85,9 +84,14 @@ h1 {
 	padding: 8px;
 	border: 0;
 	font-size: 16px;
-	height: 100%;
+	height: calc(100% - 48px);
 	tab-size: 4;
 	background-color: rgba(0, 0, 0, 0);
+	width: 100%;
+}
+.workarea .error_info {
+	margin: -64px 64px;
+	z-index: -999;
 }
 
 .scroll_area {
@@ -104,8 +108,10 @@ h1 {
 	padding: 32px;
 	margin-bottom: 16px;
 	box-shadow: 0 0 16px rgba(0, 0, 0, 0.05);
+	border-left: 2px solid rgba(0, 0, 0, 0.1);
 	border-radius: 4px;
 	cursor: pointer;
+	font-weight: normal;
 }
 .card_tab.selected {
 	margin-right: -16px;
@@ -114,6 +120,7 @@ h1 {
 	border-left: 4px solid rgba(0, 0, 0, 0.1);
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
+	font-weight: bold;
 }
 
 .error_info {
