@@ -18,6 +18,14 @@ class SideBar {
 	add_new_card(card:Card) {
 		this.all_tabs.push(new CardTab(card.title).add());
 	}
+	delete_card(title:string) {
+		for (let tab of this.all_tabs) {
+			if (tab.title == title) {
+				tab.element.remove();
+				this.all_tabs.splice(this.all_tabs.indexOf(tab), 1);
+			}
+		}
+	}
 	unload() {
 		this.all_tabs = [];
 		while(this.element.firstChild != this.add_card) if (this.element.firstChild) this.element.firstChild.remove();

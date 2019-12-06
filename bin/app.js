@@ -26,8 +26,8 @@ var App = /** @class */ (function () {
             var card = _a[_i];
             App.sidebar.add_new_card(card);
         }
-        if (CardTab.all.length > 0)
-            CardTab.all[0].select();
+        if (App.sidebar.all_tabs.length > 0)
+            App.sidebar.all_tabs[0].select();
     };
     App.get_default_deck = function () {
         return {
@@ -63,7 +63,6 @@ var CardTab = /** @class */ (function () {
         this.element.classList.add('card_tab');
         this.element.onclick = function () { return _this.select(); };
         this.rename(title);
-        CardTab.all.push(this);
     }
     CardTab.prototype.add = function () {
         App.sidebar.element.insertBefore(this.element, App.sidebar.add_card);
@@ -74,7 +73,7 @@ var CardTab = /** @class */ (function () {
         if (!card)
             return;
         App.current_card = card;
-        for (var _i = 0, _a = CardTab.all; _i < _a.length; _i++) {
+        for (var _i = 0, _a = App.sidebar.all_tabs; _i < _a.length; _i++) {
             var tab = _a[_i];
             tab.element.classList.remove('selected');
         }
@@ -86,7 +85,6 @@ var CardTab = /** @class */ (function () {
         this.title = title;
         this.element.innerText = title;
     };
-    CardTab.all = [];
     return CardTab;
 }());
 var Modal = /** @class */ (function () {
@@ -136,6 +134,7 @@ var Modal = /** @class */ (function () {
 var SideBar = /** @class */ (function () {
     function SideBar() {
         var _this = this;
+        this.all_tabs = [];
         this.element = document.getElementById('sidebar');
         this.add_card = document.getElementById('add_card');
         this.element.appendChild(this.add_card);
@@ -149,10 +148,19 @@ var SideBar = /** @class */ (function () {
         };
     }
     SideBar.prototype.add_new_card = function (card) {
-        new CardTab(card.title).add();
+        this.all_tabs.push(new CardTab(card.title).add());
+    };
+    SideBar.prototype.delete_card = function (title) {
+        for (var _i = 0, _a = this.all_tabs; _i < _a.length; _i++) {
+            var tab = _a[_i];
+            if (tab.title == title) {
+                tab.element.remove();
+                this.all_tabs.splice(this.all_tabs.indexOf(tab), 1);
+            }
+        }
     };
     SideBar.prototype.unload = function () {
-        CardTab.all = [];
+        this.all_tabs = [];
         while (this.element.firstChild != this.add_card)
             if (this.element.firstChild)
                 this.element.firstChild.remove();
@@ -325,7 +333,11 @@ var WorkArea = /** @class */ (function () {
         this.contents = document.getElementById('card_contents');
         this.error_info = document.getElementById('error_info');
         this.pos_info = document.getElementById('pos_info');
-        this.title.oninput = function () { return _this.update_card_tab(); };
+        this.delete = document.getElementById('delete');
+        this.title.oninput = function () {
+            Util.resize_input(_this.title);
+            _this.update_card_tab();
+        };
         this.contents.oninput = function () { return _this.update_card(); };
         // prevent tab out
         this.contents.onkeydown = function (e) {
@@ -338,10 +350,21 @@ var WorkArea = /** @class */ (function () {
                 _this.contents.selectionStart = _this.contents.selectionEnd = start + 1;
             }
         };
+        this.delete.onclick = function () { return new Modal({
+            cancel: 'Keep card',
+            confirm: 'Delete card',
+            on_confirm: function () {
+                _this.delete_card();
+                return true;
+            },
+            content: document.createElement('div'),
+            title: 'Delete card?'
+        }); };
         this.update_pos_info();
     }
     WorkArea.prototype.load_card = function (card) {
         this.title.value = card.title;
+        Util.resize_input(this.title);
         this.contents.value = JSON.stringify(card.content, null, '\t');
     };
     WorkArea.prototype.update_card_tab = function () {
@@ -366,6 +389,14 @@ var WorkArea = /** @class */ (function () {
         var _this = this;
         this.pos_info.innerText = this.contents.selectionStart + '';
         requestAnimationFrame(function () { return _this.update_pos_info(); });
+    };
+    WorkArea.prototype.delete_card = function () {
+        if (App.deck.deck.length <= 1)
+            return alert('A deck must have at least one card!');
+        if (!this.current_card_tab)
+            return;
+        App.sidebar.delete_card(this.current_card_tab.title);
+        App.deck.deck.splice(App.deck.deck.indexOf(Util.get_card(this.current_card_tab.title)));
     };
     WorkArea.prototype.unload = function () {
         this.title.value = '';

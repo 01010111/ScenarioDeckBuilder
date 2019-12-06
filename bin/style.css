@@ -210,3 +210,18 @@ pre {
 	resize: none;
 	background-color: rgba(0, 0, 0, 0);
 }
+
+.delete {
+	background-image: url('img/delete.png');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 75%;
+	width: 44px;
+	height: 44px;
+	float: right;
+	margin: 16px;
+	opacity: 25%;
+}
+.delete:hover {
+	opacity: 100%;
+}

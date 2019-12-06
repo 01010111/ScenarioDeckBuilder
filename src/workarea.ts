@@ -4,6 +4,7 @@ class WorkArea {
 	contents:HTMLTextAreaElement;
 	error_info:HTMLDivElement;
 	pos_info:HTMLDivElement;
+	delete:HTMLDivElement;
 	current_card_tab:CardTab | null = null;
 	constructor() {
 		this.element = document.getElementById('workarea') as HTMLDivElement;
@@ -11,10 +12,14 @@ class WorkArea {
 		this.contents = document.getElementById('card_contents') as HTMLTextAreaElement;
 		this.error_info = document.getElementById('error_info') as HTMLDivElement;
 		this.pos_info = document.getElementById('pos_info') as HTMLDivElement;
+		this.delete = document.getElementById('delete') as HTMLDivElement;
 
-		this.title.oninput = () => this.update_card_tab();
+		this.title.oninput = () => {
+			Util.resize_input(this.title);
+			this.update_card_tab();
+		}
 		this.contents.oninput = () => this.update_card();
-
+		
 		// prevent tab out
 		this.contents.onkeydown = (e) => {
 			let keycode = e.keyCode || e.which;
@@ -27,10 +32,22 @@ class WorkArea {
 			}
 		}
 
+		this.delete.onclick = () => new Modal({
+			cancel: 'Keep card',
+			confirm: 'Delete card',
+			on_confirm: () => {
+				this.delete_card();
+				return true;
+			},
+			content: document.createElement('div'),
+			title: 'Delete card?'
+		});
+		
 		this.update_pos_info();
 	}
 	load_card(card:Card) {
 		this.title.value = card.title;
+		Util.resize_input(this.title);
 		this.contents.value = JSON.stringify(card.content, null, '\t');
 	}
 	update_card_tab() {
@@ -52,6 +69,12 @@ class WorkArea {
 	update_pos_info() {
 		this.pos_info.innerText = this.contents.selectionStart + '';
 		requestAnimationFrame(() => this.update_pos_info());
+	}
+	delete_card() {
+		if (App.deck.deck.length <= 1) return alert('A deck must have at least one card!');
+		if (!this.current_card_tab) return;
+		App.sidebar.delete_card(this.current_card_tab.title);
+		App.deck.deck.splice(App.deck.deck.indexOf(Util.get_card(this.current_card_tab.title) as Card));
 	}
 	unload () {
 		this.title.value = '';
