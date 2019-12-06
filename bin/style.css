@@ -190,3 +190,16 @@ pre {
 .config:hover {
 	opacity: 100%;
 }
+
+.modal textarea {
+	font-family: monospace;
+	padding: 8px;
+	border: 2px dashed lightgray;
+	border-radius: 8px;
+	font-size: 12px;
+	height: 240px;
+	width: 100%;
+	tab-size: 4;
+	resize: none;
+	background-color: rgba(0, 0, 0, 0);
+}

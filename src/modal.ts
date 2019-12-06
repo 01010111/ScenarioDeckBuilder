@@ -21,11 +21,14 @@ class Modal {
 		cancel.classList.add('button', 'bottom', 'secondary');
 		cancel.innerText = options.cancel as string;
 		cancel.onclick = () => this.close();
+		let this_modal = this;
 		if (options.confirm && options.on_confirm) {
 			let confirm = document.createElement('div');
 			confirm.classList.add('button', 'bottom');
 			confirm.innerText = options.confirm as string;
-			confirm.onclick = () => (options.on_confirm as () => void)();
+			confirm.onclick = () => {
+				if ((options.on_confirm as () => boolean)()) this_modal.close();
+			}
 			modal.appendChild(confirm);
 		}
 		modal.appendChild(cancel);
@@ -40,7 +43,7 @@ class Modal {
 type ModalOptions = {
 	content:HTMLElement,
 	title:string,
-	on_confirm?:() => void,
+	on_confirm?:() => boolean,
 	confirm?:string,
 	cancel?:string,
 }

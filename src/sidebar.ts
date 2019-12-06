@@ -18,9 +18,8 @@ class SideBar {
 		new CardTab(card.title).add();
 	}
 	unload() {
-		for (let i = this.element.children.length - 1; i > 0; i--) {
-			this.element.children[i].remove();
-		}  
+		CardTab.all = [];
+		while(this.element.firstChild != this.add_card) if (this.element.firstChild) this.element.firstChild.remove();
 	}
 	static get_unused_title():string {
 		let title = 'My Card  ';

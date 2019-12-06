@@ -1,4 +1,16 @@
 class Validation {
+	static validate_deck(deck:Deck) {
+		let card_titles:string[] = [];
+		for (let card of deck.deck) {
+			if (card_titles.indexOf(card.title) == -1) card_titles.push(card.title);
+			else throw `Multiple cards with title "${card.title}!"`;
+			this.validate_card(card);
+		}
+	}
+	static validate_card(card:Card) {
+		if (!card.title) throw 'Card must include a title!';
+		this.validate_contents(card.content);
+	}
 	static validate_contents(contents:Content[]) {
 		for (let content of contents) {
 			if (!content.type) throw 'Content block must include type!';

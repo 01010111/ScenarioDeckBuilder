@@ -16,9 +16,10 @@ class App {
 		// init deck
 		App.deck = deck;
 		// init app
-		App.topbar = new TopBar();
-		App.sidebar = new SideBar();
-		App.workarea = new WorkArea();
+		if (!App.topbar) App.topbar = new TopBar();
+		if (!App.sidebar) App.sidebar = new SideBar();
+		if (!App.workarea) App.workarea = new WorkArea();
+		App.topbar.load();
 		// add existing cards
 		for (let card of App.deck.deck) App.sidebar.add_new_card(card);
 		if (CardTab.all.length > 0) CardTab.all[0].select();

@@ -14,9 +14,13 @@ var App = /** @class */ (function () {
         // init deck
         App.deck = deck;
         // init app
-        App.topbar = new TopBar();
-        App.sidebar = new SideBar();
-        App.workarea = new WorkArea();
+        if (!App.topbar)
+            App.topbar = new TopBar();
+        if (!App.sidebar)
+            App.sidebar = new SideBar();
+        if (!App.workarea)
+            App.workarea = new WorkArea();
+        App.topbar.load();
         // add existing cards
         for (var _i = 0, _a = App.deck.deck; _i < _a.length; _i++) {
             var card = _a[_i];
@@ -109,11 +113,15 @@ var Modal = /** @class */ (function () {
         cancel.classList.add('button', 'bottom', 'secondary');
         cancel.innerText = options.cancel;
         cancel.onclick = function () { return _this.close(); };
+        var this_modal = this;
         if (options.confirm && options.on_confirm) {
             var confirm_1 = document.createElement('div');
             confirm_1.classList.add('button', 'bottom');
             confirm_1.innerText = options.confirm;
-            confirm_1.onclick = function () { return options.on_confirm(); };
+            confirm_1.onclick = function () {
+                if (options.on_confirm())
+                    this_modal.close();
+            };
             modal.appendChild(confirm_1);
         }
         modal.appendChild(cancel);
@@ -144,9 +152,10 @@ var SideBar = /** @class */ (function () {
         new CardTab(card.title).add();
     };
     SideBar.prototype.unload = function () {
-        for (var i = this.element.children.length - 1; i > 0; i--) {
-            this.element.children[i].remove();
-        }
+        CardTab.all = [];
+        while (this.element.firstChild != this.add_card)
+            if (this.element.firstChild)
+                this.element.firstChild.remove();
     };
     SideBar.get_unused_title = function () {
         var title = 'My Card  ';
@@ -164,15 +173,19 @@ var TopBar = /** @class */ (function () {
         var _this = this;
         this.element = document.getElementById('top_bar');
         this.title_input = document.getElementById('title_input');
-        this.title_input.value = App.deck.title;
-        Util.resize_input(this.title_input);
         this.title_input.oninput = function () {
             App.deck.title = _this.title_input.value;
             Util.resize_input(_this.title_input);
         };
+        this.import = document.getElementById('import');
+        this.import.onclick = function () { return _this.make_import_modal(); };
         this.export = document.getElementById('export');
         this.export.onclick = function () { return _this.make_export_modal(); };
     }
+    TopBar.prototype.load = function () {
+        this.title_input.value = App.deck.title;
+        Util.resize_input(this.title_input);
+    };
     TopBar.prototype.make_export_modal = function () {
         var content = document.createElement('div');
         var code = document.createElement('pre');
@@ -182,7 +195,34 @@ var TopBar = /** @class */ (function () {
         var instructions = document.createElement('p');
         instructions.innerText = 'Press CTRL+C to copy!';
         content.appendChild(instructions);
-        new Modal({ content: content, title: 'Export' });
+        new Modal({ content: content, title: 'Export JSON' });
+        Util.select_text(code);
+    };
+    TopBar.prototype.make_import_modal = function () {
+        var content = document.createElement('div');
+        var code = document.createElement('textarea');
+        content.appendChild(code);
+        var error = document.createElement('div');
+        error.classList.add('error_info');
+        content.appendChild(error);
+        var import_json = function (json) {
+            try {
+                var deck = JSON.parse(json);
+                Validation.validate_deck(deck);
+                App.load_deck(deck);
+                return true;
+            }
+            catch (e) {
+                error.innerText = e;
+                return false;
+            }
+        };
+        new Modal({
+            content: content,
+            title: 'Import JSON',
+            confirm: 'Import',
+            on_confirm: function () { return import_json(code.value); }
+        });
         Util.select_text(code);
     };
     return TopBar;
@@ -212,6 +252,22 @@ var Util = /** @class */ (function () {
 var Validation = /** @class */ (function () {
     function Validation() {
     }
+    Validation.validate_deck = function (deck) {
+        var card_titles = [];
+        for (var _i = 0, _a = deck.deck; _i < _a.length; _i++) {
+            var card = _a[_i];
+            if (card_titles.indexOf(card.title) == -1)
+                card_titles.push(card.title);
+            else
+                throw "Multiple cards with title \"" + card.title + "!\"";
+            this.validate_card(card);
+        }
+    };
+    Validation.validate_card = function (card) {
+        if (!card.title)
+            throw 'Card must include a title!';
+        this.validate_contents(card.content);
+    };
     Validation.validate_contents = function (contents) {
         for (var _i = 0, contents_1 = contents; _i < contents_1.length; _i++) {
             var content = contents_1[_i];
