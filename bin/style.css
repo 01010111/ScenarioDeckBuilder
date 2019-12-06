@@ -21,6 +21,7 @@ h1 {
 	padding: 8px;
 	border: 0;
 	font-size: 24px;
+	float: left;
 }
 .button {
 	background-color:#48F;
@@ -172,4 +173,20 @@ h1 {
 
 pre {
 	font-family: monospace;
+}
+
+.config {
+	float: left;
+	background-image: url('img/settings.png');
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 75%;
+	opacity: 25%;
+	width: 40px;
+	height: 40px;
+	margin: 20px 20px 20px -20px;
+}
+
+.config:hover {
+	opacity: 100%;
 }
