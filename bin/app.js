@@ -165,7 +165,11 @@ var TopBar = /** @class */ (function () {
         this.element = document.getElementById('top_bar');
         this.title_input = document.getElementById('title_input');
         this.title_input.value = App.deck.title;
-        this.title_input.oninput = function () { return App.deck.title = _this.title_input.value; };
+        Util.resize_input(this.title_input);
+        this.title_input.oninput = function () {
+            App.deck.title = _this.title_input.value;
+            Util.resize_input(_this.title_input);
+        };
         this.export = document.getElementById('export');
         this.export.onclick = function () { return _this.make_export_modal(); };
     }
@@ -199,6 +203,9 @@ var Util = /** @class */ (function () {
         range.selectNode(node);
         window.getSelection().removeAllRanges();
         window.getSelection().addRange(range);
+    };
+    Util.resize_input = function (input) {
+        input.setAttribute('size', input.value.length + 1 + '');
     };
     return Util;
 }());

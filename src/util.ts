@@ -9,4 +9,7 @@ class Util {
 		(window.getSelection as () => Selection)().removeAllRanges();
 		(window.getSelection as () => Selection)().addRange(range);
 	}
+	static resize_input(input:HTMLInputElement) {
+		input.setAttribute('size', input.value.length + 1 + '');
+	}
 }

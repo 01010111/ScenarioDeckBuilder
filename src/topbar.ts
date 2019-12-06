@@ -7,7 +7,11 @@ class TopBar {
 		this.element = document.getElementById('top_bar') as HTMLDivElement;
 		this.title_input = document.getElementById('title_input') as HTMLInputElement;
 		this.title_input.value = App.deck.title;
-		this.title_input.oninput = () => App.deck.title = this.title_input.value;
+		Util.resize_input(this.title_input);
+		this.title_input.oninput = () => {
+			App.deck.title = this.title_input.value;
+			Util.resize_input(this.title_input);
+		}
 		this.export = document.getElementById('export') as HTMLDivElement;
 		this.export.onclick = () => this.make_export_modal();
 	}
