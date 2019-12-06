@@ -112,6 +112,9 @@ h1 {
 	border-radius: 4px;
 	cursor: pointer;
 	font-weight: normal;
+	background-repeat: no-repeat;
+	background-position: 95% 50%;
+	background-size: 15%;
 }
 .card_tab.selected {
 	margin-right: -16px;
@@ -224,4 +227,13 @@ pre {
 }
 .delete:hover {
 	opacity: 100%;
+}
+.incoming {
+	background-image: url('img/incoming.png');
+}
+.outgoing {
+	background-image: url('img/outgoing.png');
+}
+.incoming.outgoing {
+	background-image: url('img/incoming-outgoing.png');
 }

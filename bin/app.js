@@ -159,6 +159,37 @@ var SideBar = /** @class */ (function () {
             }
         }
     };
+    SideBar.prototype.update_links = function (title) {
+        var incoming_links = [];
+        var outgoing_links = [];
+        for (var _i = 0, _a = App.deck.deck; _i < _a.length; _i++) {
+            var card = _a[_i];
+            if (card.title == title) {
+                for (var _b = 0, _c = card.content; _b < _c.length; _b++) {
+                    var content = _c[_b];
+                    if (content.url)
+                        outgoing_links.push(content.url);
+                }
+                continue;
+            }
+            for (var _d = 0, _e = card.content; _d < _e.length; _d++) {
+                var content = _e[_d];
+                if (!content.url)
+                    continue;
+                if (content.url == title)
+                    incoming_links.push(card.title);
+            }
+        }
+        console.log(incoming_links, outgoing_links);
+        for (var _f = 0, _g = this.all_tabs; _f < _g.length; _f++) {
+            var tab = _g[_f];
+            tab.element.classList.remove('outgoing', 'incoming');
+            if (incoming_links.indexOf(tab.title) >= 0)
+                tab.element.classList.add('incoming');
+            if (outgoing_links.indexOf(tab.title) >= 0)
+                tab.element.classList.add('outgoing');
+        }
+    };
     SideBar.prototype.unload = function () {
         this.all_tabs = [];
         while (this.element.firstChild != this.add_card)
@@ -366,6 +397,7 @@ var WorkArea = /** @class */ (function () {
         this.title.value = card.title;
         Util.resize_input(this.title);
         this.contents.value = JSON.stringify(card.content, null, '\t');
+        App.sidebar.update_links(card.title);
     };
     WorkArea.prototype.update_card_tab = function () {
         if (!this.current_card_tab)
@@ -380,6 +412,7 @@ var WorkArea = /** @class */ (function () {
             App.current_card.content = content;
             App.current_card.title = this.title.value;
             this.error_info.innerText = '';
+            App.sidebar.update_links(this.title.value);
         }
         catch (e) {
             this.error_info.innerText = e;

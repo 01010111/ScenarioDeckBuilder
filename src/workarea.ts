@@ -49,6 +49,7 @@ class WorkArea {
 		this.title.value = card.title;
 		Util.resize_input(this.title);
 		this.contents.value = JSON.stringify(card.content, null, '\t');
+		App.sidebar.update_links(card.title);
 	}
 	update_card_tab() {
 		if (!this.current_card_tab) return;
@@ -62,6 +63,7 @@ class WorkArea {
 			App.current_card.content = content;
 			App.current_card.title = this.title.value;
 			this.error_info.innerText = '';
+			App.sidebar.update_links(this.title.value);
 		} catch(e) {
 			this.error_info.innerText = e;
 		}
