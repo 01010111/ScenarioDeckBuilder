@@ -1,0 +1,108 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: Arial, Helvetica, sans-serif;
+	transition-duration: 50ms;
+	color: #322;
+}
+
+.top_bar {
+	height: 80px;
+	box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
+}
+.top_bar input {
+	margin: 16px;
+	padding: 8px;
+	border: 0;
+	font-size: 24px;
+}
+
+.app_container {
+	width: 100vw;
+	display: flex;
+	position: relative;
+	height: calc(100vh - 80px);
+	flex-direction: row;
+	align-items: stretch;
+    backface-visibility: hidden;
+	will-change: overflow;
+}
+
+.sidebar {
+	width: 256px;
+	padding: 16px;
+}
+
+.workarea {
+	width: calc(100% - 256px);
+	padding: 32px;
+	display: flex;
+	flex-direction: column;
+}
+.workarea input {
+	margin: 16px;
+	padding: 8px;
+	border: 0;
+	font-size: 24px;
+}
+.workarea textarea {
+	font-family: monospace;
+	margin: 16px;
+	padding: 8px;
+	border: 0;
+	font-size: 16px;
+	height: 100%;
+	tab-size: 4;
+	background-color: rgba(0, 0, 0, 0);
+}
+
+.scroll_area {
+	overflow: auto;
+    -webkit-overflow-scrolling: touch;
+	-ms-overflow-style: none;
+}
+.scroll_area::-webkit-scrollbar {
+	display: none;
+}
+
+.card_tab {
+	background-color: #FFF;
+	padding: 32px;
+	margin-bottom: 16px;
+	box-shadow: 0 0 16px rgba(0, 0, 0, 0.05);
+	border-radius: 4px;
+}
+.card_tab.selected {
+	margin-right: -16px;
+	margin-left: 16px;
+	box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
+	border-left: 4px solid rgba(0, 0, 0, 0.1);
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.error_info {
+	font-family: monospace;
+	font-size: 12px;
+	margin: 16px;
+	color: red;
+}
+
+.pos_info {
+	text-align: right;
+	width: calc(100% - 40px);
+	opacity: 0.25;
+	margin-bottom: -48px;
+	font-family: monospace;
+	z-index: -999;
+}
+
+.add_card {
+	padding: 12px;
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
+    width: 128px;
+    text-align: center;
+    margin-left: 96px;
+    font-size: 34px;
+}
