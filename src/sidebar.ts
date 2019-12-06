@@ -41,7 +41,6 @@ class SideBar {
 				if (content.url == title) incoming_links.push(card.title);
 			}
 		}
-		console.log(incoming_links, outgoing_links);
 		for (let tab of this.all_tabs) {
 			tab.element.classList.remove('outgoing', 'incoming');
 			if (incoming_links.indexOf(tab.title) >= 0) tab.element.classList.add('incoming');
