@@ -632,15 +632,15 @@ var WorkArea = /** @class */ (function () {
         for (var _i = 0, _a = App.current_card.content; _i < _a.length; _i++) {
             var content = _a[_i];
             if (!content.url)
-                return;
+                continue;
             if (content.url.length == 0)
-                return;
+                continue;
             if (content.url.indexOf('.') >= 0)
-                return;
+                continue;
             for (var _b = 0, _c = App.deck.deck; _b < _c.length; _b++) {
                 var card_1 = _c[_b];
                 if (card_1.title == content.url)
-                    return;
+                    continue;
             }
             var card = {
                 title: content.url,

@@ -166,10 +166,10 @@ class WorkArea {
 	}
 	check_missing_cards() {
 		for (let content of App.current_card.content) {
-			if (!content.url) return;
-			if (content.url.length == 0) return;
-			if (content.url.indexOf('.') >= 0) return;
-			for (let card of App.deck.deck) if (card.title == content.url) return;
+			if (!content.url) continue;
+			if (content.url.length == 0) continue;
+			if (content.url.indexOf('.') >= 0) continue;
+			for (let card of App.deck.deck) if (card.title == content.url) continue;
 			let card:Card = {
 				title: content.url,
 				content: []
