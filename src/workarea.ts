@@ -97,6 +97,7 @@ class WorkArea {
 					cont = true;
 				}
 				this.check_missing_cards();
+				this.update_card();
 			}
 			// Add closing quotes
 			if (keycode == 222 && !cont) {
@@ -113,6 +114,7 @@ class WorkArea {
 				if (quotes % 2 == 1) input += e.shiftKey ? '"' : "'";
 				this.contents.value = before + input + after;
 				this.contents.selectionStart = this.contents.selectionEnd = start + 1;
+				this.update_card();
 			}
 		}
 
@@ -169,7 +171,12 @@ class WorkArea {
 			if (!content.url) continue;
 			if (content.url.length == 0) continue;
 			if (content.url.indexOf('.') >= 0) continue;
-			for (let card of App.deck.deck) if (card.title == content.url) continue;
+			let card_exists = false;
+			for (let card of App.deck.deck) {
+				if (card_exists) continue;
+				if (card.title == content.url) card_exists = true;
+			}
+			if (card_exists) continue;
 			let card:Card = {
 				title: content.url,
 				content: []
@@ -177,6 +184,7 @@ class WorkArea {
 			App.deck.deck.push(card);
 			App.sidebar.add_new_card(card);
 		}
+		App.sidebar.update_links(App.current_card.title);
 	}
 	unload () {
 		this.title.value = '';

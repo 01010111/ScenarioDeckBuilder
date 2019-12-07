@@ -554,6 +554,7 @@ var WorkArea = /** @class */ (function () {
                     cont = true;
                 }
                 _this.check_missing_cards();
+                _this.update_card();
             }
             // Add closing quotes
             if (keycode == 222 && !cont) {
@@ -573,6 +574,7 @@ var WorkArea = /** @class */ (function () {
                     input += e.shiftKey ? '"' : "'";
                 _this.contents.value = before + input + after;
                 _this.contents.selectionStart = _this.contents.selectionEnd = start + 1;
+                _this.update_card();
             }
         };
         this.delete.onclick = function () { return new Modal({
@@ -637,11 +639,16 @@ var WorkArea = /** @class */ (function () {
                 continue;
             if (content.url.indexOf('.') >= 0)
                 continue;
+            var card_exists = false;
             for (var _b = 0, _c = App.deck.deck; _b < _c.length; _b++) {
                 var card_1 = _c[_b];
-                if (card_1.title == content.url)
+                if (card_exists)
                     continue;
+                if (card_1.title == content.url)
+                    card_exists = true;
             }
+            if (card_exists)
+                continue;
             var card = {
                 title: content.url,
                 content: []
@@ -649,6 +656,7 @@ var WorkArea = /** @class */ (function () {
             App.deck.deck.push(card);
             App.sidebar.add_new_card(card);
         }
+        App.sidebar.update_links(App.current_card.title);
     };
     WorkArea.prototype.unload = function () {
         this.title.value = '';
