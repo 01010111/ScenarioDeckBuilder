@@ -14,13 +14,13 @@ type Card = {
 	content:Content[],
 }
 type Content = {
-	type:String,
-	text?:String,
-	src?:String,
-	display?:String,
-	url?:String,
+	type:string,
+	text?:string,
+	src?:string,
+	display?:string,
+	url?:string,
 	amt?:number,
-	flag?:String,
+	flag?:string,
 	value?:boolean,
 	end?:boolean,
 }
