@@ -92,11 +92,11 @@ class WorkArea {
 				let end = this.contents.selectionEnd;
 				let after = this.contents.value.substring(end);
 				if (after.charAt(0) == (e.shiftKey ? '"' : "'")) {
-					console.log(after.charAt(0));
 					e.preventDefault();
 					this.contents.selectionStart = this.contents.selectionEnd = start + 1;
 					cont = true;
 				}
+				this.check_missing_cards();
 			}
 			// Add closing quotes
 			if (keycode == 222 && !cont) {
@@ -170,7 +170,12 @@ class WorkArea {
 			if (content.url.length == 0) return;
 			if (content.url.indexOf('.') >= 0) return;
 			for (let card of App.deck.deck) if (card.title == content.url) return;
-			console.log('new card needed', content.url);
+			let card:Card = {
+				title: content.url,
+				content: []
+			}
+			App.deck.deck.push(card);
+			App.sidebar.add_new_card(card);
 		}
 	}
 	unload () {
