@@ -61,6 +61,7 @@ class WorkArea {
 			let content = JSON.parse(this.contents.value);
 			Validation.validate_contents(content);
 			App.current_card.content = content;
+			if (App.deck.first_card == App.current_card.title) App.deck.first_card = this.title.value;
 			App.current_card.title = this.title.value;
 			this.error_info.innerText = '';
 			App.sidebar.update_links(this.title.value);
