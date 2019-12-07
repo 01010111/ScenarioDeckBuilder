@@ -12,4 +12,9 @@ class Util {
 	static resize_input(input:HTMLInputElement) {
 		input.setAttribute('size', input.value.length + 1 + '');
 	}
+	static make_label(text:string):HTMLLabelElement {
+		let out = document.createElement('label');
+		out.innerText = text;
+		return out;
+	}
 }

@@ -84,7 +84,7 @@ h1 {
 	padding: 8px;
 	border: 0;
 	font-size: 16px;
-	height: calc(100% - 48px);
+	height: calc(100% - 128px);
 	tab-size: 4;
 	background-color: rgba(0, 0, 0, 0);
 	width: 100%;
@@ -197,6 +197,7 @@ pre {
 	width: 40px;
 	height: 40px;
 	margin: 20px 20px 20px -20px;
+	cursor: pointer;
 }
 
 .config:hover {
@@ -238,4 +239,23 @@ pre {
 }
 .incoming.outgoing {
 	background-image: url('img/incoming-outgoing.png');
+}
+
+.settings {
+	display: flex;
+    flex-direction: column;
+}
+
+.settings input {
+	padding: 8px;
+	font-size: 14px;
+}
+
+.settings select {
+	height: 36px;
+	font-size: 14px;
+}
+
+.settings label {
+	margin: 16px 0 0 0;
 }

@@ -1,6 +1,7 @@
 class TopBar {
 	element:HTMLDivElement;
 	title_input:HTMLInputElement;
+	config:HTMLDivElement;
 	import:HTMLDivElement;
 	export:HTMLDivElement;
 	constructor() {
@@ -10,6 +11,8 @@ class TopBar {
 			App.deck.title = this.title_input.value;
 			Util.resize_input(this.title_input);
 		}
+		this.config = document.getElementById('config') as HTMLDivElement;
+		this.config.onclick = () => Settings.make_config_modal();
 		this.import = document.getElementById('import') as HTMLDivElement;
 		this.import.onclick = () => this.make_import_modal();
 		this.export = document.getElementById('export') as HTMLDivElement;
@@ -57,4 +60,5 @@ class TopBar {
 		});
 		Util.select_text(code);
 	}
+
 }

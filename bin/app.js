@@ -131,6 +131,95 @@ var Modal = /** @class */ (function () {
     };
     return Modal;
 }());
+var Settings = /** @class */ (function () {
+    function Settings() {
+    }
+    Settings.make_config_modal = function () {
+        var content = document.createElement('div');
+        content.classList.add('settings');
+        // first card
+        content.appendChild(Util.make_label('First Card'));
+        var first_card = document.createElement('select');
+        for (var _i = 0, _a = App.deck.deck; _i < _a.length; _i++) {
+            var card = _a[_i];
+            var opt = document.createElement('option');
+            opt.value = opt.text = card.title;
+            if (card.title == App.deck.first_card)
+                opt.selected = true;
+            first_card.add(opt);
+        }
+        content.appendChild(first_card);
+        // theme
+        content.appendChild(Util.make_label('Theme'));
+        var themes = document.createElement('select');
+        for (var _b = 0, _c = ['legacy', 'simple']; _b < _c.length; _b++) {
+            var theme = _c[_b];
+            var opt = document.createElement('option');
+            opt.value = opt.text = theme;
+            if (theme == App.deck.theme)
+                opt.selected = true;
+            themes.add(opt);
+        }
+        content.appendChild(themes);
+        // subtitle
+        content.appendChild(Util.make_label('Subtitle'));
+        var subtitle = document.createElement('input');
+        subtitle.value = App.deck.subtitle;
+        content.appendChild(subtitle);
+        // description
+        content.appendChild(Util.make_label('Description'));
+        var description = document.createElement('input');
+        description.value = App.deck.description;
+        content.appendChild(description);
+        // button text
+        content.appendChild(Util.make_label('Start Button Text'));
+        var button_text = document.createElement('input');
+        button_text.value = App.deck.button_text;
+        content.appendChild(button_text);
+        // bg src
+        content.appendChild(Util.make_label('Background Image'));
+        var bg_src = document.createElement('input');
+        bg_src.placeholder = 'None';
+        bg_src.value = App.deck.bg_src ? App.deck.bg_src : '';
+        content.appendChild(bg_src);
+        // on confirm
+        var validate = function () {
+            if (subtitle.value.length == 0) {
+                alert('Please enter a subtitle!');
+                return false;
+            }
+            if (description.value.length == 0) {
+                alert('Please enter a description!');
+                return false;
+            }
+            if (button_text.value.length == 0) {
+                alert('Please enter start button text!');
+                return false;
+            }
+            return true;
+        };
+        var save = function () {
+            var ok = validate();
+            if (!ok)
+                return false;
+            App.deck.first_card = first_card.value;
+            App.deck.theme = themes.value;
+            App.deck.subtitle = subtitle.value;
+            App.deck.description = description.value;
+            App.deck.button_text = button_text.value;
+            App.deck.bg_src = (bg_src.value.length == 0 ? undefined : bg_src.value);
+            return true;
+        };
+        new Modal({
+            content: content,
+            title: App.deck.title + " Config",
+            cancel: 'Cancel',
+            confirm: 'Save',
+            on_confirm: function () { return save(); }
+        });
+    };
+    return Settings;
+}());
 var SideBar = /** @class */ (function () {
     function SideBar() {
         var _this = this;
@@ -180,7 +269,6 @@ var SideBar = /** @class */ (function () {
                     incoming_links.push(card.title);
             }
         }
-        console.log(incoming_links, outgoing_links);
         for (var _f = 0, _g = this.all_tabs; _f < _g.length; _f++) {
             var tab = _g[_f];
             tab.element.classList.remove('outgoing', 'incoming');
@@ -216,6 +304,8 @@ var TopBar = /** @class */ (function () {
             App.deck.title = _this.title_input.value;
             Util.resize_input(_this.title_input);
         };
+        this.config = document.getElementById('config');
+        this.config.onclick = function () { return Settings.make_config_modal(); };
         this.import = document.getElementById('import');
         this.import.onclick = function () { return _this.make_import_modal(); };
         this.export = document.getElementById('export');
@@ -285,6 +375,11 @@ var Util = /** @class */ (function () {
     };
     Util.resize_input = function (input) {
         input.setAttribute('size', input.value.length + 1 + '');
+    };
+    Util.make_label = function (text) {
+        var out = document.createElement('label');
+        out.innerText = text;
+        return out;
     };
     return Util;
 }());
@@ -410,6 +505,8 @@ var WorkArea = /** @class */ (function () {
             var content = JSON.parse(this.contents.value);
             Validation.validate_contents(content);
             App.current_card.content = content;
+            if (App.deck.first_card == App.current_card.title)
+                App.deck.first_card = this.title.value;
             App.current_card.title = this.title.value;
             this.error_info.innerText = '';
             App.sidebar.update_links(this.title.value);
@@ -429,7 +526,8 @@ var WorkArea = /** @class */ (function () {
         if (!this.current_card_tab)
             return;
         App.sidebar.delete_card(this.current_card_tab.title);
-        App.deck.deck.splice(App.deck.deck.indexOf(Util.get_card(this.current_card_tab.title)));
+        App.deck.deck.splice(App.deck.deck.indexOf(Util.get_card(this.current_card_tab.title)), 1);
+        App.sidebar.all_tabs[0].select();
     };
     WorkArea.prototype.unload = function () {
         this.title.value = '';
