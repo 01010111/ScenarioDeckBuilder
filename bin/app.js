@@ -465,14 +465,113 @@ var WorkArea = /** @class */ (function () {
             _this.update_card_tab();
         };
         this.contents.oninput = function () { return _this.update_card(); };
-        // prevent tab out
+        // parse input
         this.contents.onkeydown = function (e) {
             var keycode = e.keyCode || e.which;
+            // prevent tab out
             if (keycode == 9) {
                 e.preventDefault();
                 var start = _this.contents.selectionStart;
                 var end = _this.contents.selectionEnd;
                 _this.contents.value = _this.contents.value.substring(0, start) + '\t' + _this.contents.value.substring(end);
+                _this.contents.selectionStart = _this.contents.selectionEnd = start + 1;
+            }
+            // insert tabs on enter
+            if (keycode == 13) {
+                e.preventDefault();
+                var start = _this.contents.selectionStart;
+                var end = _this.contents.selectionEnd;
+                var before = _this.contents.value.substring(0, start);
+                var after = _this.contents.value.substring(end);
+                var spacing = 0;
+                for (var _i = 0, _a = before.split(''); _i < _a.length; _i++) {
+                    var char = _a[_i];
+                    if (['[', '{'].indexOf(char) >= 0)
+                        spacing++;
+                    if ([']', '}'].indexOf(char) >= 0)
+                        spacing--;
+                }
+                var input = '\n';
+                for (var i = 0; i < spacing; i++)
+                    input += '\t';
+                if ([']', '}'].indexOf(after.charAt(0)) >= 0) {
+                    input += '\n';
+                    for (var i = 1; i < spacing; i++)
+                        input += '\t';
+                }
+                _this.contents.value = before + input + after;
+                _this.contents.selectionStart = _this.contents.selectionEnd = start + 1 + spacing;
+            }
+            // Add closing brackets
+            if (keycode == 219) {
+                e.preventDefault();
+                var start = _this.contents.selectionStart;
+                var end = _this.contents.selectionEnd;
+                var before = _this.contents.value.substring(0, start);
+                var after = _this.contents.value.substring(end);
+                var openings = 1;
+                var closings = 0;
+                for (var _b = 0, _c = before.split(''); _b < _c.length; _b++) {
+                    var char = _c[_b];
+                    if (['[', '{'].indexOf(char) >= 0)
+                        openings++;
+                    if ([']', '}'].indexOf(char) >= 0)
+                        openings--;
+                }
+                for (var _d = 0, _e = after.split(''); _d < _e.length; _d++) {
+                    var char = _e[_d];
+                    if (['[', '{'].indexOf(char) >= 0)
+                        closings--;
+                    if ([']', '}'].indexOf(char) >= 0)
+                        closings++;
+                }
+                var input = e.shiftKey ? '{' : '[';
+                if (openings > closings)
+                    input += e.shiftKey ? '}' : ']';
+                _this.contents.value = before + input + after;
+                _this.contents.selectionStart = _this.contents.selectionEnd = start + 1;
+            }
+            // Ignore brackets if bracket-adjacent
+            if (keycode == 221) {
+                var start = _this.contents.selectionStart;
+                var end = _this.contents.selectionEnd;
+                var after = _this.contents.value.substring(end);
+                if (after.charAt(0) == (e.shiftKey ? '}' : ']')) {
+                    e.preventDefault();
+                    _this.contents.selectionStart = _this.contents.selectionEnd = start + 1;
+                }
+            }
+            // quotes
+            var cont = false;
+            // Ignore quotes if quote-adjacent
+            if (keycode == 222) {
+                var start = _this.contents.selectionStart;
+                var end = _this.contents.selectionEnd;
+                var after = _this.contents.value.substring(end);
+                if (after.charAt(0) == (e.shiftKey ? '"' : "'")) {
+                    console.log(after.charAt(0));
+                    e.preventDefault();
+                    _this.contents.selectionStart = _this.contents.selectionEnd = start + 1;
+                    cont = true;
+                }
+            }
+            // Add closing quotes
+            if (keycode == 222 && !cont) {
+                e.preventDefault();
+                var start = _this.contents.selectionStart;
+                var end = _this.contents.selectionEnd;
+                var before = _this.contents.value.substring(0, start);
+                var after = _this.contents.value.substring(end);
+                var quotes = 1;
+                for (var _f = 0, _g = before.split(''); _f < _g.length; _f++) {
+                    var char = _g[_f];
+                    if (['"', "'"].indexOf(char) >= 0)
+                        quotes++;
+                }
+                var input = e.shiftKey ? '"' : "'";
+                if (quotes % 2 == 1)
+                    input += e.shiftKey ? '"' : "'";
+                _this.contents.value = before + input + after;
                 _this.contents.selectionStart = _this.contents.selectionEnd = start + 1;
             }
         };
@@ -528,6 +627,23 @@ var WorkArea = /** @class */ (function () {
         App.sidebar.delete_card(this.current_card_tab.title);
         App.deck.deck.splice(App.deck.deck.indexOf(Util.get_card(this.current_card_tab.title)), 1);
         App.sidebar.all_tabs[0].select();
+    };
+    WorkArea.prototype.check_missing_cards = function () {
+        for (var _i = 0, _a = App.current_card.content; _i < _a.length; _i++) {
+            var content = _a[_i];
+            if (!content.url)
+                return;
+            if (content.url.length == 0)
+                return;
+            if (content.url.indexOf('.') >= 0)
+                return;
+            for (var _b = 0, _c = App.deck.deck; _b < _c.length; _b++) {
+                var card = _c[_b];
+                if (card.title == content.url)
+                    return;
+            }
+            console.log('new card needed', content.url);
+        }
     };
     WorkArea.prototype.unload = function () {
         this.title.value = '';

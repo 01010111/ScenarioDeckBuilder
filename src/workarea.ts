@@ -20,14 +20,98 @@ class WorkArea {
 		}
 		this.contents.oninput = () => this.update_card();
 		
-		// prevent tab out
+		// parse input
 		this.contents.onkeydown = (e) => {
 			let keycode = e.keyCode || e.which;
+			// prevent tab out
 			if (keycode == 9) {
 				e.preventDefault();
 				let start = this.contents.selectionStart;
 				let end = this.contents.selectionEnd;
 				this.contents.value = this.contents.value.substring(0, start) + '\t' + this.contents.value.substring(end);
+				this.contents.selectionStart = this.contents.selectionEnd = start + 1;
+			}
+			// insert tabs on enter
+			if (keycode == 13) {
+				e.preventDefault();
+				let start = this.contents.selectionStart;
+				let end = this.contents.selectionEnd;
+				let before = this.contents.value.substring(0, start);
+				let after = this.contents.value.substring(end);
+				let spacing = 0;
+				for (let char of before.split('')) {
+					if (['[', '{'].indexOf(char) >= 0) spacing++;
+					if ([']', '}'].indexOf(char) >= 0) spacing--;
+				}
+				let input = '\n';
+				for (let i = 0; i < spacing; i++) input += '\t';
+				if ([']', '}'].indexOf(after.charAt(0)) >= 0) {
+					input += '\n';
+					for (let i = 1; i < spacing; i++) input += '\t';
+				}
+				this.contents.value = before + input + after;
+				this.contents.selectionStart = this.contents.selectionEnd = start + 1 + spacing;
+			}
+			// Add closing brackets
+			if (keycode == 219) {
+				e.preventDefault();
+				let start = this.contents.selectionStart;
+				let end = this.contents.selectionEnd;
+				let before = this.contents.value.substring(0, start);
+				let after = this.contents.value.substring(end);
+				var openings = 1;
+				var closings = 0;
+				for (let char of before.split('')) {
+					if (['[', '{'].indexOf(char) >= 0) openings++;
+					if ([']', '}'].indexOf(char) >= 0) openings--;
+				}
+				for (let char of after.split('')) {
+					if (['[', '{'].indexOf(char) >= 0) closings--;
+					if ([']', '}'].indexOf(char) >= 0) closings++;
+				}
+				let input = e.shiftKey ? '{' : '[';
+				if (openings > closings) input += e.shiftKey ? '}' : ']';
+				this.contents.value = before + input + after;
+				this.contents.selectionStart = this.contents.selectionEnd = start + 1;
+			}
+			// Ignore brackets if bracket-adjacent
+			if (keycode == 221) {
+				let start = this.contents.selectionStart;
+				let end = this.contents.selectionEnd;
+				let after = this.contents.value.substring(end);
+				if (after.charAt(0) == (e.shiftKey ? '}' : ']')) {
+					e.preventDefault();
+					this.contents.selectionStart = this.contents.selectionEnd = start + 1;
+				}
+			}
+			// quotes
+			let cont = false;
+			// Ignore quotes if quote-adjacent
+			if (keycode == 222) {
+				let start = this.contents.selectionStart;
+				let end = this.contents.selectionEnd;
+				let after = this.contents.value.substring(end);
+				if (after.charAt(0) == (e.shiftKey ? '"' : "'")) {
+					console.log(after.charAt(0));
+					e.preventDefault();
+					this.contents.selectionStart = this.contents.selectionEnd = start + 1;
+					cont = true;
+				}
+			}
+			// Add closing quotes
+			if (keycode == 222 && !cont) {
+				e.preventDefault();
+				let start = this.contents.selectionStart;
+				let end = this.contents.selectionEnd;
+				let before = this.contents.value.substring(0, start);
+				let after = this.contents.value.substring(end);
+				var quotes = 1;
+				for (let char of before.split('')) {
+					if (['"', "'"].indexOf(char) >= 0) quotes++;
+				}
+				let input = e.shiftKey ? '"' : "'";
+				if (quotes % 2 == 1) input += e.shiftKey ? '"' : "'";
+				this.contents.value = before + input + after;
 				this.contents.selectionStart = this.contents.selectionEnd = start + 1;
 			}
 		}
@@ -79,6 +163,15 @@ class WorkArea {
 		App.sidebar.delete_card(this.current_card_tab.title);
 		App.deck.deck.splice(App.deck.deck.indexOf(Util.get_card(this.current_card_tab.title) as Card), 1);
 		App.sidebar.all_tabs[0].select();
+	}
+	check_missing_cards() {
+		for (let content of App.current_card.content) {
+			if (!content.url) return;
+			if (content.url.length == 0) return;
+			if (content.url.indexOf('.') >= 0) return;
+			for (let card of App.deck.deck) if (card.title == content.url) return;
+			console.log('new card needed', content.url);
+		}
 	}
 	unload () {
 		this.title.value = '';
