@@ -26,7 +26,7 @@ class Validation {
 					break;
 				case 'button':
 					if (!content.text) throw 'Button content must include text!';
-					if (!content.url) throw 'Button content must include url!';
+					if (!content.url && !content.end) throw 'Button content must include url or end!';
 					break;
 				case 'article':
 					if (!content.text) throw 'Article content must include text!';

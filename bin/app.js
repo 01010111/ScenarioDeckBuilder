@@ -75,9 +75,14 @@ var CardTab = /** @class */ (function () {
         App.current_card = card;
         for (var _i = 0, _a = App.sidebar.all_tabs; _i < _a.length; _i++) {
             var tab = _a[_i];
-            tab.element.classList.remove('selected');
+            tab.element.classList.remove('selected', 'end');
         }
         this.element.classList.add('selected');
+        for (var _b = 0, _c = card.content; _b < _c.length; _b++) {
+            var c = _c[_b];
+            if (c.end)
+                this.element.classList.add('end');
+        }
         App.workarea.load_card(card);
         App.workarea.current_card_tab = this;
     };
@@ -423,8 +428,8 @@ var Validation = /** @class */ (function () {
                 case 'button':
                     if (!content.text)
                         throw 'Button content must include text!';
-                    if (!content.url)
-                        throw 'Button content must include url!';
+                    if (!content.url && !content.end)
+                        throw 'Button content must include url or end!';
                     break;
                 case 'article':
                     if (!content.text)
