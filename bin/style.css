@@ -198,6 +198,11 @@ pre {
 	margin: 20px 20px 20px -20px;
 	cursor: pointer;
 }
+.config.nodes {
+	float: right;
+	margin: 20px 0;
+	background-image: url('img/nodes.png');
+}
 
 .config:hover {
 	opacity: 100%;
@@ -286,4 +291,8 @@ pre {
     background-color: #8BC34A;
     box-shadow: 0 4px 0 #009688;
     border-top: 1px solid #CDDC39;
+}
+
+.nodemap {
+	cursor: crosshair;
 }

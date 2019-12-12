@@ -5,6 +5,7 @@ class TopBar {
 	import:HTMLDivElement;
 	export:HTMLDivElement;
 	preview:HTMLDivElement;
+	nodes:HTMLDivElement;
 	constructor() {
 		this.element = document.getElementById('top_bar') as HTMLDivElement;
 		this.title_input = document.getElementById('title_input') as HTMLInputElement;
@@ -20,6 +21,8 @@ class TopBar {
 		this.export.onclick = () => this.make_export_modal();
 		this.preview = document.getElementById('preview_btn') as HTMLDivElement;
 		this.preview.onclick = () => new Preview();
+		this.nodes = document.getElementById('node_btn') as HTMLDivElement;
+		this.nodes.onclick = () => new Nodemap(App.current_card.title);
 	}
 	load() {
 		this.title_input.value = App.deck.title;

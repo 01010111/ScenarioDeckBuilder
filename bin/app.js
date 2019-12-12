@@ -145,11 +145,143 @@ var Modal = /** @class */ (function () {
     return Modal;
 }());
 var Nodemap = /** @class */ (function () {
-    function Nodemap() {
+    function Nodemap(title) {
+        var _this = this;
+        this.nodes = [];
+        this.node_width = 128;
+        this.node_height = 64;
+        this.node_padding_v = 32;
+        this.node_padding_h = 32;
+        this.node_cascade = 32;
+        this.selected = title;
         this.element = document.createElement('div');
+        this.element.classList.add('modal_container', 'nodemap');
         this.canvas = document.createElement('canvas');
+        this.canvas.width = document.body.clientWidth;
+        this.canvas.height = document.body.clientHeight;
         this.context = this.canvas.getContext('2d');
+        this.context.lineWidth = 2;
+        this.context.font = '14px sans-serif';
+        this.element.appendChild(this.canvas);
+        document.body.appendChild(this.element);
+        this.canvas.onclick = function (e) { return _this.click_node(e); };
+        this.make_nodes();
     }
+    Nodemap.prototype.click_node = function (e) {
+        var clicked_node = undefined;
+        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+            var node = _a[_i];
+            if (e.x > node.p.x &&
+                e.x < node.p.x + this.node_width &&
+                e.y > node.p.y &&
+                e.y < node.p.y + this.node_height)
+                clicked_node = node;
+        }
+        this.element.remove();
+        if (clicked_node != undefined)
+            for (var _b = 0, _c = App.sidebar.all_tabs; _b < _c.length; _b++) {
+                var tab = _c[_b];
+                if (tab.title == clicked_node.name)
+                    tab.select();
+            }
+    };
+    Nodemap.prototype.make_nodes = function () {
+        for (var _i = 0, _a = App.deck.deck; _i < _a.length; _i++) {
+            var card = _a[_i];
+            var node = {
+                p: { x: 0, y: 0 },
+                name: card.title,
+                to: [],
+                color: ['red', 'blue', 'orange', 'green', 'purple'][this.nodes.length % 5]
+            };
+            this.nodes.push(node);
+        }
+        var x = 0;
+        var y = 0;
+        for (var _b = 0, _c = this.nodes; _b < _c.length; _b++) {
+            var node = _c[_b];
+            var card = Util.get_card(node.name);
+            for (var _d = 0, _e = card.content; _d < _e.length; _d++) {
+                var c = _e[_d];
+                if (c.url) {
+                    var to = this.get_node_from_name(this.nodes, c.url);
+                    if (to)
+                        node.to.push(to);
+                }
+                if (c.end)
+                    node.exit = true;
+            }
+        }
+        this.get_node_from_name(this.nodes, App.deck.first_card).p = { x: this.node_padding_h, y: this.node_padding_v };
+        for (var _f = 0, _g = this.nodes; _f < _g.length; _f++) {
+            var node = _g[_f];
+            this.draw_node_lines(node);
+        }
+        for (var _h = 0, _j = this.nodes; _h < _j.length; _h++) {
+            var node = _j[_h];
+            this.draw_node(node);
+        }
+    };
+    Nodemap.prototype.get_node_from_name = function (nodes, name) {
+        for (var _i = 0, nodes_1 = nodes; _i < nodes_1.length; _i++) {
+            var node = nodes_1[_i];
+            if (node.name == name)
+                return node;
+        }
+        return null;
+    };
+    Nodemap.prototype.get_node_out = function (node) {
+        return { x: node.p.x + this.node_width, y: node.p.y + this.node_height / 2 };
+    };
+    Nodemap.prototype.get_node_in = function (node) {
+        return { x: node.p.x, y: node.p.y + this.node_height / 2 };
+    };
+    Nodemap.prototype.draw_node = function (node) {
+        this.context.beginPath();
+        this.context.fillStyle = 'white';
+        this.context.fillRect(node.p.x, node.p.y, this.node_width, this.node_height);
+        this.context.fillStyle = node.color;
+        this.context.fillText(node.name, node.p.x + 24, node.p.y + this.node_height / 2 + 3);
+        this.context.rect(node.p.x, node.p.y, this.node_width, this.node_height);
+        this.context.strokeStyle = node.color;
+        if (node.name == this.selected)
+            this.context.lineWidth = 4;
+        this.context.stroke();
+        this.context.lineWidth = 2;
+        if (node.exit)
+            this.draw_exit(node);
+    };
+    Nodemap.prototype.draw_node_lines = function (node) {
+        this.context.strokeStyle = node.color;
+        var y = node.p.y + this.node_cascade;
+        for (var _i = 0, _a = node.to; _i < _a.length; _i++) {
+            var n = _a[_i];
+            if (n.p.x == 0) {
+                n.p.x = node.p.x + this.node_width + this.node_padding_h;
+                n.p.y = y;
+                y += this.node_height + this.node_padding_v;
+            }
+            this.context.lineWidth = n.name == this.selected || node.name == this.selected ? 4 : 2;
+            node.p.x < n.p.x ? this.draw_line(this.get_node_out(node), this.get_node_in(n)) : this.draw_line(this.get_node_out(n), this.get_node_in(node), true);
+            this.context.lineWidth = 2;
+        }
+    };
+    Nodemap.prototype.draw_line = function (p1, p2, dashed) {
+        if (dashed === void 0) { dashed = false; }
+        this.context.beginPath();
+        this.context.moveTo(p1.x, p1.y);
+        var midx = p1.x + (p2.x - p1.x) / 2;
+        this.context.bezierCurveTo(midx, p1.y, midx, p2.y, p2.x, p2.y);
+        !dashed ? this.context.setLineDash([]) : this.context.setLineDash([8, 8]);
+        this.context.stroke();
+        this.context.setLineDash([]);
+    };
+    Nodemap.prototype.draw_exit = function (node) {
+        this.context.moveTo(node.p.x + this.node_width, node.p.y + this.node_height / 2);
+        this.context.lineTo(node.p.x + this.node_width + this.node_padding_h / 2, node.p.y + this.node_height / 2);
+        this.context.stroke();
+        this.context.fillRect(node.p.x + this.node_width + this.node_padding_h / 2, node.p.y + this.node_height / 2 - 8, 4, 16);
+    };
     return Nodemap;
 }());
 var Preview = /** @class */ (function () {
@@ -361,6 +493,8 @@ var TopBar = /** @class */ (function () {
         this.export.onclick = function () { return _this.make_export_modal(); };
         this.preview = document.getElementById('preview_btn');
         this.preview.onclick = function () { return new Preview(); };
+        this.nodes = document.getElementById('node_btn');
+        this.nodes.onclick = function () { return new Nodemap(App.current_card.title); };
     }
     TopBar.prototype.load = function () {
         this.title_input.value = App.deck.title;
