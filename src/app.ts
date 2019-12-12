@@ -31,6 +31,7 @@ class App {
 			subtitle: 'Situation Deck',
 			button_text: 'Begin',
 			description: 'New Situation Deck',
+			bg_src: 'assets/business.png',
 			first_card: 'My Card',
 			deck: [
 				{
