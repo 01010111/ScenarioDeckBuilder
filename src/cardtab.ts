@@ -22,6 +22,9 @@ class CardTab {
 		App.workarea.load_card(card);
 		App.workarea.current_card_tab = this;
 	}
+	refresh() {
+		for (let c of App.current_card.content) if (c.end) this.element.classList.add('end');
+	}
 	rename(title:string) {
 		this.title = title;
 		this.element.innerText = title;

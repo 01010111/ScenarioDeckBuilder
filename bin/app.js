@@ -87,6 +87,13 @@ var CardTab = /** @class */ (function () {
         App.workarea.load_card(card);
         App.workarea.current_card_tab = this;
     };
+    CardTab.prototype.refresh = function () {
+        for (var _i = 0, _a = App.current_card.content; _i < _a.length; _i++) {
+            var c = _a[_i];
+            if (c.end)
+                this.element.classList.add('end');
+        }
+    };
     CardTab.prototype.rename = function (title) {
         this.title = title;
         this.element.innerText = title;
@@ -655,6 +662,8 @@ var WorkArea = /** @class */ (function () {
             App.current_card.title = this.title.value;
             this.error_info.innerText = '';
             App.sidebar.update_links(this.title.value);
+            if (this.current_card_tab)
+                this.current_card_tab.refresh();
         }
         catch (e) {
             this.error_info.innerText = e;

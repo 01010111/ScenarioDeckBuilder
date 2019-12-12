@@ -151,6 +151,7 @@ class WorkArea {
 			App.current_card.title = this.title.value;
 			this.error_info.innerText = '';
 			App.sidebar.update_links(this.title.value);
+			if (this.current_card_tab) this.current_card_tab.refresh();
 		} catch(e) {
 			this.error_info.innerText = e;
 		}
