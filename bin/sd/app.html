@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Scenario Deck</title>
+	<style>
+		* {
+			padding:0;
+			margin:0;
+			overflow: hidden;
+			image-rendering: -webkit-optimize-contrast;
+		}
+	</style>
+</head>
+	<script src="include/pixi.js"></script>
+	<script src="include/TweenMax.min.js"></script>
+	<script src="include/EasePack.min.js"></script>
+	<script src="include/WebFontLoader.min.js"></script>
+	<script src="app.js"></script>
+<body>
+	<script type="text/javascript">
+		var params = new URLSearchParams(document.location.href.split('?')[1]);
+		if (params.get('src')) fetch(params.get('src')).then((res) => res.json()).then((json) => init(json));
+		function init(input) {
+			if (input.deck) App.init(input);
+			else if (isJson(input)) App.init(JSON.parse(input));
+			else fetch(input).then((res) => res.json()).then((json) => init(json));
+		}
+		function isJson(s) {
+			try { JSON.parse(s); }
+			catch(e) { return false; }
+			return true;
+		}
+	</script>
+</body>
+</html>

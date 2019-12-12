@@ -36,6 +36,7 @@ var App = /** @class */ (function () {
             subtitle: 'Situation Deck',
             button_text: 'Begin',
             description: 'New Situation Deck',
+            bg_src: 'assets/business.png',
             first_card: 'My Card',
             deck: [
                 {
@@ -135,6 +136,42 @@ var Modal = /** @class */ (function () {
         this.container.remove();
     };
     return Modal;
+}());
+var Nodemap = /** @class */ (function () {
+    function Nodemap() {
+        this.element = document.createElement('div');
+        this.canvas = document.createElement('canvas');
+        this.context = this.canvas.getContext('2d');
+    }
+    return Nodemap;
+}());
+var Preview = /** @class */ (function () {
+    function Preview() {
+        var _this = this;
+        // container
+        this.container = document.createElement('div');
+        this.container.classList.add('modal_container');
+        // close btn
+        var close_btn = document.createElement('div');
+        close_btn.classList.add('preview', 'close_btn');
+        close_btn.onclick = function () { return _this.close(); };
+        // preview
+        var preview = document.createElement('iframe');
+        preview.classList.add('preview');
+        this.container.appendChild(preview);
+        preview.src = 'sd/app.html';
+        preview.onload = function () {
+            var app_window = preview.contentWindow;
+            app_window.init(App.deck);
+            _this.container.appendChild(close_btn);
+        };
+        // add to body
+        document.body.appendChild(this.container);
+    }
+    Preview.prototype.close = function () {
+        this.container.remove();
+    };
+    return Preview;
 }());
 var Settings = /** @class */ (function () {
     function Settings() {
@@ -315,6 +352,8 @@ var TopBar = /** @class */ (function () {
         this.import.onclick = function () { return _this.make_import_modal(); };
         this.export = document.getElementById('export');
         this.export.onclick = function () { return _this.make_export_modal(); };
+        this.preview = document.getElementById('preview_btn');
+        this.preview.onclick = function () { return new Preview(); };
     }
     TopBar.prototype.load = function () {
         this.title_input.value = App.deck.title;

@@ -29,7 +29,7 @@ h1 {
 	padding: 16px 32px;
 	color: white;
 	border-radius: 4px;
-	margin: 12px 32px;
+	margin: 12px;
 	float: right;
 	box-shadow: 0 4px 0 #24D;
 	border-top: 1px solid #8DF;
@@ -260,4 +260,30 @@ pre {
 
 .settings label {
 	margin: 16px 0 0 0;
+}
+
+.preview {
+	border: none;
+	border-radius: 8px;
+	position: absolute;
+	width: 600px;
+	height: 600px;
+	top: calc(50vh - 300px);
+	left: calc(50vh - 300px);
+}
+
+.preview.close_btn {
+	position: absolute;
+    top: calc(50vh - 288px);
+    left: calc(50vh - 288px);
+    width: 16px;
+    height: 16px;
+    background-color: #FF004D;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px;
+}
+.preview_button.button {
+    background-color: #8BC34A;
+    box-shadow: 0 4px 0 #009688;
+    border-top: 1px solid #CDDC39;
 }
