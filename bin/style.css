@@ -296,3 +296,9 @@ pre {
 .nodemap {
 	cursor: crosshair;
 }
+
+.content_link_area {
+	border-style: solid !important;
+	border-width: 1px !important;
+	border-radius: 0 !important;
+}

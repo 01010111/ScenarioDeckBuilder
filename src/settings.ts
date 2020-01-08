@@ -43,6 +43,13 @@ class Settings {
 		bg_src.placeholder = 'None';
 		bg_src.value = App.deck.bg_src ? App.deck.bg_src : '';
 		content.appendChild(bg_src);
+		// content links
+		content.appendChild(Util.make_label('Content Links'));
+		let content_links = document.createElement('textarea');
+		content_links.classList.add('content_link_area');
+		content_links.value = App.deck.content_links ? JSON.stringify(App.deck.content_links, null, '\t') : '[]';
+		content_links.onkeydown = (e) => Util.parse_code_input(content_links, e);
+		content.appendChild(content_links);
 		// on confirm
 		let validate = () => {
 			if (subtitle.value.length == 0) {
@@ -57,6 +64,27 @@ class Settings {
 				alert('Please enter start button text!');
 				return false;
 			}
+			try {
+				JSON.parse(content_links.value);
+			} catch(e) {
+				alert(e);
+				return false;
+			}
+			let content_link_data = JSON.parse(content_links.value);
+			for (let link of content_link_data) {
+				if (!link.image) {
+					alert('Content link must include image!');
+					return false;
+				}
+				if (!link.title) {
+					alert('Content link must include title!');
+					return false;
+				}
+				if (!link.url) {
+					alert('Content link must include url!');
+					return false;
+				}
+			}
 			return true;
 		}
 		let save = () => {
@@ -68,6 +96,8 @@ class Settings {
 			App.deck.description = description.value;
 			App.deck.button_text = button_text.value;
 			App.deck.bg_src = (bg_src.value.length == 0 ? undefined : bg_src.value);
+			var content_link_data = JSON.parse(content_links.value);
+			App.deck.content_links = (content_link_data && content_link_data.length > 0) ? content_link_data : null;
 			return true;
 		}
 		new Modal({

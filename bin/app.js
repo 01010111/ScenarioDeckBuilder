@@ -363,6 +363,13 @@ var Settings = /** @class */ (function () {
         bg_src.placeholder = 'None';
         bg_src.value = App.deck.bg_src ? App.deck.bg_src : '';
         content.appendChild(bg_src);
+        // content links
+        content.appendChild(Util.make_label('Content Links'));
+        var content_links = document.createElement('textarea');
+        content_links.classList.add('content_link_area');
+        content_links.value = App.deck.content_links ? JSON.stringify(App.deck.content_links, null, '\t') : '[]';
+        content_links.onkeydown = function (e) { return Util.parse_code_input(content_links, e); };
+        content.appendChild(content_links);
         // on confirm
         var validate = function () {
             if (subtitle.value.length == 0) {
@@ -377,6 +384,29 @@ var Settings = /** @class */ (function () {
                 alert('Please enter start button text!');
                 return false;
             }
+            try {
+                JSON.parse(content_links.value);
+            }
+            catch (e) {
+                alert(e);
+                return false;
+            }
+            var content_link_data = JSON.parse(content_links.value);
+            for (var _i = 0, content_link_data_1 = content_link_data; _i < content_link_data_1.length; _i++) {
+                var link = content_link_data_1[_i];
+                if (!link.image) {
+                    alert('Content link must include image!');
+                    return false;
+                }
+                if (!link.title) {
+                    alert('Content link must include title!');
+                    return false;
+                }
+                if (!link.url) {
+                    alert('Content link must include url!');
+                    return false;
+                }
+            }
             return true;
         };
         var save = function () {
@@ -389,6 +419,8 @@ var Settings = /** @class */ (function () {
             App.deck.description = description.value;
             App.deck.button_text = button_text.value;
             App.deck.bg_src = (bg_src.value.length == 0 ? undefined : bg_src.value);
+            var content_link_data = JSON.parse(content_links.value);
+            App.deck.content_links = (content_link_data && content_link_data.length > 0) ? content_link_data : null;
             return true;
         };
         new Modal({
@@ -565,6 +597,114 @@ var Util = /** @class */ (function () {
         var out = document.createElement('label');
         out.innerText = text;
         return out;
+    };
+    Util.parse_code_input = function (c, e) {
+        var keycode = e.keyCode || e.which;
+        // prevent tab out
+        if (keycode == 9) {
+            e.preventDefault();
+            var start = c.selectionStart;
+            var end = c.selectionEnd;
+            c.value = c.value.substring(0, start) + '\t' + c.value.substring(end);
+            c.selectionStart = c.selectionEnd = start + 1;
+        }
+        // insert tabs on enter
+        if (keycode == 13) {
+            e.preventDefault();
+            var start = c.selectionStart;
+            var end = c.selectionEnd;
+            var before = c.value.substring(0, start);
+            var after = c.value.substring(end);
+            var spacing = 0;
+            for (var _i = 0, _a = before.split(''); _i < _a.length; _i++) {
+                var char = _a[_i];
+                if (['[', '{'].indexOf(char) >= 0)
+                    spacing++;
+                if ([']', '}'].indexOf(char) >= 0)
+                    spacing--;
+            }
+            var input = '\n';
+            for (var i = 0; i < spacing; i++)
+                input += '\t';
+            if ([']', '}'].indexOf(after.charAt(0)) >= 0) {
+                input += '\n';
+                for (var i = 1; i < spacing; i++)
+                    input += '\t';
+            }
+            c.value = before + input + after;
+            c.selectionStart = c.selectionEnd = start + 1 + spacing;
+        }
+        // Add closing brackets
+        if (keycode == 219) {
+            e.preventDefault();
+            var start = c.selectionStart;
+            var end = c.selectionEnd;
+            var before = c.value.substring(0, start);
+            var after = c.value.substring(end);
+            var openings = 1;
+            var closings = 0;
+            for (var _b = 0, _c = before.split(''); _b < _c.length; _b++) {
+                var char = _c[_b];
+                if (['[', '{'].indexOf(char) >= 0)
+                    openings++;
+                if ([']', '}'].indexOf(char) >= 0)
+                    openings--;
+            }
+            for (var _d = 0, _e = after.split(''); _d < _e.length; _d++) {
+                var char = _e[_d];
+                if (['[', '{'].indexOf(char) >= 0)
+                    closings--;
+                if ([']', '}'].indexOf(char) >= 0)
+                    closings++;
+            }
+            var input = e.shiftKey ? '{' : '[';
+            if (openings > closings)
+                input += e.shiftKey ? '}' : ']';
+            c.value = before + input + after;
+            c.selectionStart = c.selectionEnd = start + 1;
+        }
+        // Ignore brackets if bracket-adjacent
+        if (keycode == 221) {
+            var start = c.selectionStart;
+            var end = c.selectionEnd;
+            var after = c.value.substring(end);
+            if (after.charAt(0) == (e.shiftKey ? '}' : ']')) {
+                e.preventDefault();
+                c.selectionStart = c.selectionEnd = start + 1;
+            }
+        }
+        // quotes
+        var cont = false;
+        // Ignore quotes if quote-adjacent
+        if (keycode == 222) {
+            var start = c.selectionStart;
+            var end = c.selectionEnd;
+            var after = c.value.substring(end);
+            if (after.charAt(0) == (e.shiftKey ? '"' : "'")) {
+                e.preventDefault();
+                c.selectionStart = c.selectionEnd = start + 1;
+                cont = true;
+            }
+        }
+        // Add closing quotes
+        if (keycode == 222 && !cont) {
+            e.preventDefault();
+            var start = c.selectionStart;
+            var end = c.selectionEnd;
+            var before = c.value.substring(0, start);
+            var after = c.value.substring(end);
+            var quotes = 1;
+            for (var _f = 0, _g = before.split(''); _f < _g.length; _f++) {
+                var char = _g[_f];
+                if (['"', "'"].indexOf(char) >= 0)
+                    quotes++;
+            }
+            var input = e.shiftKey ? '"' : "'";
+            if (quotes % 2 == 1)
+                input += e.shiftKey ? '"' : "'";
+            c.value = before + input + after;
+            c.selectionStart = c.selectionEnd = start + 1;
+        }
     };
     return Util;
 }());
