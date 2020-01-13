@@ -137,7 +137,7 @@ var ElementModal = /** @class */ (function () {
         // article
         this.make_input(this.article_options, 'a_text', 'Article Title');
         this.make_input(this.article_options, 'a_src', 'Article Image Source');
-        this.make_input(this.article_options, 'a_url', 'Article URL');
+        this.make_input(this.article_options, 'a_url', 'Link to URL');
         // flag
         this.make_input(this.flag_options, 'f_text', 'Flag Name');
         this.make_checkbox(this.flag_options, 'f_bool', 'Set Flag to True?', true);
