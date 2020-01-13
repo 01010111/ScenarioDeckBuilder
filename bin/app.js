@@ -115,7 +115,7 @@ var ElementModal = /** @class */ (function () {
         content.appendChild(this.article_options = document.createElement('div'));
         content.appendChild(this.flag_options = document.createElement('div'));
         content.appendChild(this.points_options = document.createElement('div'));
-        this.make_input(document.createElement('div'), 'content_flag', 'Check if this flag is true to create');
+        //this.make_input(content, 'content_flag', 'Check if this flag is true to create');
         this.add_content();
         this.hide_all();
     }
@@ -352,9 +352,8 @@ var ElementModal = /** @class */ (function () {
         return true;
     };
     ElementModal.prototype.add_new_content = function (content) {
-        var flag = document.getElementById('content_flag').value;
-        if (flag.length > 0)
-            content.flag = flag;
+        //let flag = (document.getElementById('content_flag') as HTMLInputElement).value;
+        //if (flag.length > 0) content.flag = flag;
         App.current_card.content.push(content);
         App.workarea.load_card(App.current_card);
     };
