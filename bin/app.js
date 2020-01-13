@@ -115,10 +115,24 @@ var ElementModal = /** @class */ (function () {
         content.appendChild(this.article_options = document.createElement('div'));
         content.appendChild(this.flag_options = document.createElement('div'));
         content.appendChild(this.points_options = document.createElement('div'));
-        //this.make_input(content, 'content_flag', 'Check if this flag is true to create');
+        if (this.get_flags().length > 0)
+            this.make_dropdown(content, 'content_flag', this.get_flags(['None']), 'Show only if this flag is set');
         this.add_content();
         this.hide_all();
     }
+    ElementModal.prototype.get_flags = function (out) {
+        if (out === void 0) { out = []; }
+        for (var _i = 0, _a = App.deck.deck; _i < _a.length; _i++) {
+            var card = _a[_i];
+            for (var _b = 0, _c = card.content; _b < _c.length; _b++) {
+                var content = _c[_b];
+                if (content.type == 'flag' && content.text)
+                    if (out.indexOf(content.text) == -1)
+                        out.push(content.text);
+            }
+        }
+        return out;
+    };
     ElementModal.prototype.add_content = function () {
         var _this = this;
         // paragraph
@@ -142,7 +156,9 @@ var ElementModal = /** @class */ (function () {
         this.make_input(this.flag_options, 'f_text', 'Flag Name');
         this.make_checkbox(this.flag_options, 'f_bool', 'Set Flag to True?', true);
         // points
-        this.make_input(this.points_options, 'p_amt', 'Amount of Points');
+        var p_input = this.make_input(this.points_options, 'p_amt', 'Amount of Points');
+        p_input.setAttribute('type', 'number');
+        p_input.setAttribute('min', '1');
     };
     ElementModal.prototype.get_button_options = function () {
         var out = ['URL'];
@@ -171,6 +187,7 @@ var ElementModal = /** @class */ (function () {
         if (text.length > 0)
             input.value = text;
         container.appendChild(input);
+        return input;
     };
     ElementModal.prototype.make_textarea = function (container, id, label, text) {
         if (text === void 0) { text = ''; }
@@ -393,8 +410,11 @@ var ElementModal = /** @class */ (function () {
         return true;
     };
     ElementModal.prototype.add_new_content = function (content) {
-        //let flag = (document.getElementById('content_flag') as HTMLInputElement).value;
-        //if (flag.length > 0) content.flag = flag;
+        if (this.get_flags().length > 0) {
+            var flag = document.getElementById('content_flag').value;
+            if (flag.length > 0 && flag != 'None')
+                content.flag = flag;
+        }
         App.current_card.content.push(content);
         App.workarea.load_card(App.current_card);
     };

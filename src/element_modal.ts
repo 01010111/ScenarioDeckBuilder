@@ -25,9 +25,16 @@ class ElementModal {
 		content.appendChild(this.article_options = document.createElement('div'));
 		content.appendChild(this.flag_options = document.createElement('div'));
 		content.appendChild(this.points_options = document.createElement('div'));
-		//this.make_input(content, 'content_flag', 'Check if this flag is true to create');
+		if (this.get_flags().length > 0) this.make_dropdown(content, 'content_flag', this.get_flags(['None']), 'Show only if this flag is set');
 		this.add_content();
 		this.hide_all();
+	}
+
+	get_flags(out:string[] = []) {
+		for (let card of App.deck.deck) for (let content of card.content) {
+			if (content.type == 'flag' && content.text) if (out.indexOf(content.text) == -1) out.push(content.text);
+		}
+		return out;
 	}
 
 	add_content() {
@@ -52,7 +59,9 @@ class ElementModal {
 		this.make_input(this.flag_options, 'f_text', 'Flag Name');
 		this.make_checkbox(this.flag_options, 'f_bool', 'Set Flag to True?', true);
 		// points
-		this.make_input(this.points_options, 'p_amt', 'Amount of Points');
+		let p_input = this.make_input(this.points_options, 'p_amt', 'Amount of Points');
+		p_input.setAttribute('type', 'number');
+		p_input.setAttribute('min', '1');
 	}
 
 	get_button_options() {
@@ -78,6 +87,7 @@ class ElementModal {
 		input.id = id;
 		if (text.length > 0) input.value = text;
 		container.appendChild(input);
+		return input;
 	}
 
 	make_textarea(container:HTMLElement, id:string, label:string, text:string = '') {
@@ -290,8 +300,10 @@ class ElementModal {
 	}
 
 	add_new_content(content:Content) {
-		//let flag = (document.getElementById('content_flag') as HTMLInputElement).value;
-		//if (flag.length > 0) content.flag = flag;
+		if (this.get_flags().length > 0) {
+			let flag = (document.getElementById('content_flag') as HTMLInputElement).value;
+			if (flag.length > 0 && flag != 'None') content.flag = flag;
+		}
 		App.current_card.content.push(content);
 		App.workarea.load_card(App.current_card);
 	}
