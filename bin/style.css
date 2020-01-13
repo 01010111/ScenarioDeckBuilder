@@ -88,9 +88,10 @@ h1 {
 	tab-size: 4;
 	background-color: rgba(0, 0, 0, 0);
 	width: 100%;
+	margin-top: -8px;
 }
 .workarea .error_info {
-	margin: -64px 64px;
+	margin: -64px 64px -14px 64px;
 	z-index: -999;
 }
 
@@ -134,12 +135,11 @@ h1 {
 }
 
 .pos_info {
-	text-align: right;
-	width: calc(100% - 40px);
-	opacity: 0.25;
-	margin-bottom: -48px;
-	font-family: monospace;
-	z-index: -999;
+    opacity: 0.25;
+    font-family: monospace;
+    z-index: -999;
+    right: 64px;
+	position: absolute;
 }
 
 .add_card {
@@ -256,11 +256,13 @@ pre {
 .settings input {
 	padding: 8px;
 	font-size: 14px;
+	width: 100%;
 }
 
 .settings select {
 	height: 36px;
 	font-size: 14px;
+	width: 100%;
 }
 
 .settings label {
@@ -301,4 +303,13 @@ pre {
 	border-style: solid !important;
 	border-width: 1px !important;
 	border-radius: 0 !important;
+}
+
+.button.element {
+    float: left;
+    margin-top: 64px;
+}
+
+.hidden {
+	display: none;
 }

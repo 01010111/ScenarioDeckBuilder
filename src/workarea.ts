@@ -5,6 +5,7 @@ class WorkArea {
 	error_info:HTMLDivElement;
 	pos_info:HTMLDivElement;
 	delete:HTMLDivElement;
+	new_element:HTMLDivElement;
 	current_card_tab:CardTab | null = null;
 	constructor() {
 		this.element = document.getElementById('workarea') as HTMLDivElement;
@@ -13,6 +14,7 @@ class WorkArea {
 		this.error_info = document.getElementById('error_info') as HTMLDivElement;
 		this.pos_info = document.getElementById('pos_info') as HTMLDivElement;
 		this.delete = document.getElementById('delete') as HTMLDivElement;
+		this.new_element = document.getElementById('new_element') as HTMLDivElement;
 
 		this.title.oninput = () => {
 			Util.resize_input(this.title);
@@ -130,6 +132,8 @@ class WorkArea {
 		});
 		
 		this.update_pos_info();
+
+		this.new_element.onclick = () => new ElementModal();
 	}
 	load_card(card:Card) {
 		this.title.value = card.title;
@@ -157,7 +161,7 @@ class WorkArea {
 		}
 	}
 	update_pos_info() {
-		this.pos_info.innerText = this.contents.selectionStart + '';
+		this.pos_info.innerText = 'Cursor position: ' + this.contents.selectionStart;
 		requestAnimationFrame(() => this.update_pos_info());
 	}
 	delete_card() {

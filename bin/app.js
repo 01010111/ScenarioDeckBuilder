@@ -100,6 +100,270 @@ var CardTab = /** @class */ (function () {
     };
     return CardTab;
 }());
+var ElementModal = /** @class */ (function () {
+    function ElementModal() {
+        var _this = this;
+        var content = document.createElement('div');
+        content.classList.add('settings');
+        new Modal({
+            title: 'New Element',
+            confirm: 'Add New Element',
+            cancel: 'Cancel',
+            content: content,
+            on_confirm: function () { return _this.add_element(); }
+        });
+        content.appendChild(this.make_selector());
+        content.appendChild(this.paragraph_options = document.createElement('div'));
+        content.appendChild(this.button_options = document.createElement('div'));
+        content.appendChild(this.image_options = document.createElement('div'));
+        content.appendChild(this.textbox_options = document.createElement('div'));
+        content.appendChild(this.article_options = document.createElement('div'));
+        content.appendChild(this.flag_options = document.createElement('div'));
+        content.appendChild(this.points_options = document.createElement('div'));
+        this.make_input(content, 'content_flag', 'Check if this flag is true to create');
+        this.add_content();
+        this.hide_all();
+    }
+    ElementModal.prototype.add_content = function () {
+        // paragraph
+        this.make_input(this.paragraph_options, 'p_text', 'Paragraph Text');
+        // button
+        this.make_input(this.button_options, 'b_text', 'Button Text');
+        this.make_input(this.button_options, 'b_url', 'Button URL');
+        this.make_checkbox(this.button_options, 'b_end', 'End Scenario?');
+        // image
+        this.make_input(this.image_options, 'i_url', 'Image URL');
+        this.make_dropdown(this.image_options, 'i_display', ['padded', 'full-width'], 'Image Display');
+        // textbox
+        this.make_input(this.textbox_options, 'tb_text', 'Textbox Text');
+        // article
+        this.make_input(this.article_options, 'a_text', 'Article Title');
+        this.make_input(this.article_options, 'a_src', 'Article Image URL');
+        this.make_input(this.article_options, 'a_url', 'Article URL');
+        // flag
+        this.make_input(this.flag_options, 'f_text', 'Flag Name');
+        this.make_checkbox(this.flag_options, 'f_bool', 'Set Flag to True?');
+        // points
+        this.make_input(this.points_options, 'p_amt', 'Amount of Points');
+    };
+    ElementModal.prototype.make_input = function (container, id, label, text) {
+        if (text === void 0) { text = ''; }
+        container.appendChild(Util.make_label(label));
+        var input = document.createElement('input');
+        input.id = id;
+        if (text.length > 0)
+            input.value = text;
+        container.appendChild(input);
+    };
+    ElementModal.prototype.make_checkbox = function (container, id, label) {
+        var input = document.createElement('input');
+        input.id = id;
+        input.setAttribute('type', 'checkbox');
+        container.appendChild(input);
+        container.appendChild(Util.make_label(label));
+    };
+    ElementModal.prototype.make_dropdown = function (container, id, options, label) {
+        var dropdown = document.createElement('select');
+        dropdown.id = id;
+        for (var _i = 0, options_1 = options; _i < options_1.length; _i++) {
+            var el = options_1[_i];
+            var opt = document.createElement('option');
+            opt.value = opt.innerText = el;
+            dropdown.options.add(opt);
+        }
+        this.image_options.appendChild(Util.make_label(label));
+        this.image_options.appendChild(dropdown);
+    };
+    ElementModal.prototype.hide_all = function () {
+        for (var _i = 0, _a = [
+            this.paragraph_options,
+            this.button_options,
+            this.image_options,
+            this.textbox_options,
+            this.article_options,
+            this.flag_options,
+            this.points_options
+        ]; _i < _a.length; _i++) {
+            var el = _a[_i];
+            el.classList.add('hidden');
+        }
+    };
+    ElementModal.prototype.make_selector = function () {
+        var _this = this;
+        var out = document.createElement('select');
+        out.id = 'element_selector';
+        for (var _i = 0, _a = ['Choose Element Type', 'paragraph', 'button', 'image', 'textbox', 'article', 'flag', 'points']; _i < _a.length; _i++) {
+            var el = _a[_i];
+            var el_option = document.createElement('option');
+            el_option.value = el;
+            el_option.innerText = el;
+            out.options.add(el_option);
+        }
+        out.onchange = function (e) { return _this.make_selection(); };
+        return out;
+    };
+    ElementModal.prototype.make_selection = function () {
+        this.hide_all();
+        var selection = document.getElementById('element_selector').value;
+        switch (selection) {
+            case 'paragraph':
+                this.paragraph_options.classList.remove('hidden');
+                break;
+            case 'button':
+                this.button_options.classList.remove('hidden');
+                break;
+            case 'image':
+                this.image_options.classList.remove('hidden');
+                break;
+            case 'textbox':
+                this.textbox_options.classList.remove('hidden');
+                break;
+            case 'article':
+                this.article_options.classList.remove('hidden');
+                break;
+            case 'flag':
+                this.flag_options.classList.remove('hidden');
+                break;
+            case 'points':
+                this.points_options.classList.remove('hidden');
+                break;
+            default: break;
+        }
+    };
+    ElementModal.prototype.add_element = function () {
+        var selection = document.getElementById('element_selector').value;
+        switch (selection) {
+            case 'paragraph': return this.validate_paragraph();
+            case 'button': return this.validate_button();
+            case 'image': return this.validate_image();
+            case 'textbox': return this.validate_textbox();
+            case 'article': return this.validate_article();
+            case 'flag': return this.validate_flag();
+            case 'points': return this.validate_points();
+            default: return false;
+        }
+    };
+    ElementModal.prototype.validate_paragraph = function () {
+        var p_text = document.getElementById('p_text').value;
+        if (p_text.length == 0) {
+            alert('Paragraph must have text!');
+            return false;
+        }
+        this.add_new_content({
+            type: 'paragraph',
+            text: p_text
+        });
+        return true;
+    };
+    ElementModal.prototype.validate_button = function () {
+        var b_text = document.getElementById('b_text').value;
+        if (b_text.length == 0) {
+            alert('Button must have text!');
+            return false;
+        }
+        var b_url = document.getElementById('b_url').value;
+        var b_end = document.getElementById('b_end').checked;
+        if (b_url.length == 0 && !b_end) {
+            alert('Button must have a URL or End the Scenario!');
+            return false;
+        }
+        this.add_new_content({
+            type: 'button',
+            text: b_text,
+            url: b_url,
+            end: b_end
+        });
+        return true;
+    };
+    ElementModal.prototype.validate_image = function () {
+        var i_url = document.getElementById('i_url').value;
+        if (i_url.length == 0) {
+            alert('Image must have a URL!');
+            return false;
+        }
+        var i_display = document.getElementById('i_display').value;
+        this.add_new_content({
+            type: 'image',
+            url: i_url,
+            display: i_display
+        });
+        return true;
+    };
+    ElementModal.prototype.validate_textbox = function () {
+        var tb_text = document.getElementById('tb_text').value;
+        if (tb_text.length == 0) {
+            alert('Textbox must have text!');
+            return false;
+        }
+        this.add_new_content({
+            type: 'textbox',
+            text: tb_text
+        });
+        return true;
+    };
+    ElementModal.prototype.validate_article = function () {
+        var a_text = document.getElementById('a_text').value;
+        var a_src = document.getElementById('a_src').value;
+        var a_url = document.getElementById('a_url').value;
+        if (a_text.length == 0) {
+            alert('Article must have text!');
+            return false;
+        }
+        if (a_src.length == 0) {
+            alert('Article must have Image URL!');
+            return false;
+        }
+        if (a_url.length == 0) {
+            alert('Article must have URL!');
+            return false;
+        }
+        this.add_new_content({
+            type: 'article',
+            text: a_text,
+            src: a_src,
+            url: a_url
+        });
+        return true;
+    };
+    ElementModal.prototype.validate_flag = function () {
+        var f_text = document.getElementById('f_text').value;
+        var f_bool = document.getElementById('f_bool').checked;
+        if (f_text.length == 0) {
+            alert('Flag must have text!');
+            return false;
+        }
+        this.add_new_content({
+            type: 'flag',
+            text: f_text,
+            value: f_bool
+        });
+        return true;
+    };
+    ElementModal.prototype.validate_points = function () {
+        var p_amt = document.getElementById('p_amt').value;
+        if (p_amt.length == 0) {
+            alert('Points must have an Amount!');
+            return false;
+        }
+        if (isNaN(parseInt(p_amt))) {
+            alert('Points amount must be a number!');
+            return false;
+        }
+        this.add_new_content({
+            type: 'points',
+            amt: parseInt(p_amt)
+        });
+        return true;
+    };
+    ElementModal.prototype.add_new_content = function (content) {
+        var flag = document.getElementById('content_flag').value;
+        if (flag.length > 0)
+            content.flag = flag;
+        App.current_card.content.push(content);
+        App.workarea.load_card(App.current_card);
+    };
+    return ElementModal;
+}());
 var Modal = /** @class */ (function () {
     function Modal(options) {
         var _this = this;
@@ -785,6 +1049,7 @@ var WorkArea = /** @class */ (function () {
         this.error_info = document.getElementById('error_info');
         this.pos_info = document.getElementById('pos_info');
         this.delete = document.getElementById('delete');
+        this.new_element = document.getElementById('new_element');
         this.title.oninput = function () {
             Util.resize_input(_this.title);
             _this.update_card_tab();
@@ -913,6 +1178,7 @@ var WorkArea = /** @class */ (function () {
             title: 'Delete card?'
         }); };
         this.update_pos_info();
+        this.new_element.onclick = function () { return new ElementModal(); };
     }
     WorkArea.prototype.load_card = function (card) {
         this.title.value = card.title;
@@ -945,7 +1211,7 @@ var WorkArea = /** @class */ (function () {
     };
     WorkArea.prototype.update_pos_info = function () {
         var _this = this;
-        this.pos_info.innerText = this.contents.selectionStart + '';
+        this.pos_info.innerText = 'Cursor position: ' + this.contents.selectionStart;
         requestAnimationFrame(function () { return _this.update_pos_info(); });
     };
     WorkArea.prototype.delete_card = function () {
