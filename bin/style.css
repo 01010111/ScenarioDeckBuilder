@@ -317,3 +317,12 @@ pre {
 .checkbox {
 	width: 32px !important;
 }
+
+.new_element textarea {
+	width: 100%;
+	border: 1px solid black;
+	border-radius: 0;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	height: auto;
+}

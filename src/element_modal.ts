@@ -9,7 +9,7 @@ class ElementModal {
 
 	constructor(old_content?:Content) {
 		let content = document.createElement('div');
-		content.classList.add('settings');
+		content.classList.add('settings', 'new_element');
 		new Modal({
 			title: old_content ? 'Edit Element' : 'New Element',
 			confirm: old_content ? 'Save Changes' : 'Add New Element',
@@ -32,23 +32,23 @@ class ElementModal {
 
 	add_content() {
 		// paragraph
-		this.make_input(this.paragraph_options, 'p_text', 'Paragraph Text');
+		this.make_textarea(this.paragraph_options, 'p_text', 'Paragraph Text');
 		// button
 		this.make_input(this.button_options, 'b_text', 'Button Text');
-		this.make_input(this.button_options, 'b_url', 'Button URL');
+		this.make_input(this.button_options, 'b_url', 'Button Link');
 		this.make_checkbox(this.button_options, 'b_end', 'End Scenario?');
 		// image
-		this.make_input(this.image_options, 'i_url', 'Image URL');
+		this.make_input(this.image_options, 'i_url', 'Image Source');
 		this.make_dropdown(this.image_options, 'i_display', ['padded', 'full-width'], 'Image Display');
 		// textbox
-		this.make_input(this.textbox_options, 'tb_text', 'Textbox Text');
+		this.make_textarea(this.textbox_options, 'tb_text', 'Textbox Text');
 		// article
 		this.make_input(this.article_options, 'a_text', 'Article Title');
-		this.make_input(this.article_options, 'a_src', 'Article Image URL');
+		this.make_input(this.article_options, 'a_src', 'Article Image Source');
 		this.make_input(this.article_options, 'a_url', 'Article URL');
 		// flag
 		this.make_input(this.flag_options, 'f_text', 'Flag Name');
-		this.make_checkbox(this.flag_options, 'f_bool', 'Set Flag to True?');
+		this.make_checkbox(this.flag_options, 'f_bool', 'Set Flag to True?', true);
 		// points
 		this.make_input(this.points_options, 'p_amt', 'Amount of Points');
 	}
@@ -61,22 +61,36 @@ class ElementModal {
 		container.appendChild(input);
 	}
 
-	make_checkbox(container:HTMLElement, id:string, label:string) {
+	make_textarea(container:HTMLElement, id:string, label:string, text:string = '') {
+		container.appendChild(Util.make_label(label));
+		let input = document.createElement('textarea');
+		input.rows = 5;
+		input.id = id;
+		if (text.length > 0) input.value = text;
+		container.appendChild(input);
+	}
+
+	make_checkbox(container:HTMLElement, id:string, label:string, is_true:boolean = false) {
 		let input = document.createElement('input');
 		input.classList.add('checkbox');
 		input.id = id;
 		input.setAttribute('type', 'checkbox');
+		input.checked = is_true;
 		container.appendChild(input);
 		container.appendChild(Util.make_label(label));
 	}
 
-	make_dropdown(container:HTMLElement, id:string, options:string[], label:string) {
+	make_dropdown(container:HTMLElement, id:string, options:string[], label:string, onchange?:(arg0: string) => void) {
 		let dropdown = document.createElement('select');
 		dropdown.id = id;
 		for (let el of options) {
 			let opt = document.createElement('option');
 			opt.value = opt.innerText = el;
 			dropdown.options.add(opt);
+		}
+		if (onchange) dropdown.onchange = (e) => {
+			let value = (document.getElementById(id) as HTMLSelectElement).value;
+			onchange(value);
 		}
 		this.image_options.appendChild(Util.make_label(label));
 		this.image_options.appendChild(dropdown);
@@ -207,7 +221,7 @@ class ElementModal {
 			return false;
 		}
 		if (a_src.length == 0) {
-			alert('Article must have Image URL!');
+			alert('Article must have Image Source!');
 			return false;
 		}
 		if (a_url.length == 0) {

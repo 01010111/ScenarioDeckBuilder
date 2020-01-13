@@ -99,7 +99,7 @@ var ElementModal = /** @class */ (function () {
     function ElementModal(old_content) {
         var _this = this;
         var content = document.createElement('div');
-        content.classList.add('settings');
+        content.classList.add('settings', 'new_element');
         new Modal({
             title: old_content ? 'Edit Element' : 'New Element',
             confirm: old_content ? 'Save Changes' : 'Add New Element',
@@ -121,23 +121,23 @@ var ElementModal = /** @class */ (function () {
     }
     ElementModal.prototype.add_content = function () {
         // paragraph
-        this.make_input(this.paragraph_options, 'p_text', 'Paragraph Text');
+        this.make_textarea(this.paragraph_options, 'p_text', 'Paragraph Text');
         // button
         this.make_input(this.button_options, 'b_text', 'Button Text');
-        this.make_input(this.button_options, 'b_url', 'Button URL');
+        this.make_input(this.button_options, 'b_url', 'Button Link');
         this.make_checkbox(this.button_options, 'b_end', 'End Scenario?');
         // image
-        this.make_input(this.image_options, 'i_url', 'Image URL');
+        this.make_input(this.image_options, 'i_url', 'Image Source');
         this.make_dropdown(this.image_options, 'i_display', ['padded', 'full-width'], 'Image Display');
         // textbox
-        this.make_input(this.textbox_options, 'tb_text', 'Textbox Text');
+        this.make_textarea(this.textbox_options, 'tb_text', 'Textbox Text');
         // article
         this.make_input(this.article_options, 'a_text', 'Article Title');
-        this.make_input(this.article_options, 'a_src', 'Article Image URL');
+        this.make_input(this.article_options, 'a_src', 'Article Image Source');
         this.make_input(this.article_options, 'a_url', 'Article URL');
         // flag
         this.make_input(this.flag_options, 'f_text', 'Flag Name');
-        this.make_checkbox(this.flag_options, 'f_bool', 'Set Flag to True?');
+        this.make_checkbox(this.flag_options, 'f_bool', 'Set Flag to True?', true);
         // points
         this.make_input(this.points_options, 'p_amt', 'Amount of Points');
     };
@@ -150,15 +150,27 @@ var ElementModal = /** @class */ (function () {
             input.value = text;
         container.appendChild(input);
     };
-    ElementModal.prototype.make_checkbox = function (container, id, label) {
+    ElementModal.prototype.make_textarea = function (container, id, label, text) {
+        if (text === void 0) { text = ''; }
+        container.appendChild(Util.make_label(label));
+        var input = document.createElement('textarea');
+        input.rows = 5;
+        input.id = id;
+        if (text.length > 0)
+            input.value = text;
+        container.appendChild(input);
+    };
+    ElementModal.prototype.make_checkbox = function (container, id, label, is_true) {
+        if (is_true === void 0) { is_true = false; }
         var input = document.createElement('input');
         input.classList.add('checkbox');
         input.id = id;
         input.setAttribute('type', 'checkbox');
+        input.checked = is_true;
         container.appendChild(input);
         container.appendChild(Util.make_label(label));
     };
-    ElementModal.prototype.make_dropdown = function (container, id, options, label) {
+    ElementModal.prototype.make_dropdown = function (container, id, options, label, onchange) {
         var dropdown = document.createElement('select');
         dropdown.id = id;
         for (var _i = 0, options_1 = options; _i < options_1.length; _i++) {
@@ -167,6 +179,11 @@ var ElementModal = /** @class */ (function () {
             opt.value = opt.innerText = el;
             dropdown.options.add(opt);
         }
+        if (onchange)
+            dropdown.onchange = function (e) {
+                var value = document.getElementById(id).value;
+                onchange(value);
+            };
         this.image_options.appendChild(Util.make_label(label));
         this.image_options.appendChild(dropdown);
     };
@@ -306,7 +323,7 @@ var ElementModal = /** @class */ (function () {
             return false;
         }
         if (a_src.length == 0) {
-            alert('Article must have Image URL!');
+            alert('Article must have Image Source!');
             return false;
         }
         if (a_url.length == 0) {
