@@ -7,12 +7,12 @@ class ElementModal {
 	flag_options:HTMLDivElement;
 	points_options:HTMLDivElement;
 
-	constructor() {
+	constructor(old_content?:Content) {
 		let content = document.createElement('div');
 		content.classList.add('settings');
 		new Modal({
-			title: 'New Element',
-			confirm: 'Add New Element',
+			title: old_content ? 'Edit Element' : 'New Element',
+			confirm: old_content ? 'Save Changes' : 'Add New Element',
 			cancel: 'Cancel',
 			content: content,
 			on_confirm: () => this.add_element()
@@ -25,7 +25,7 @@ class ElementModal {
 		content.appendChild(this.article_options = document.createElement('div'));
 		content.appendChild(this.flag_options = document.createElement('div'));
 		content.appendChild(this.points_options = document.createElement('div'));
-		this.make_input(content, 'content_flag', 'Check if this flag is true to create');
+		this.make_input(document.createElement('div'), 'content_flag', 'Check if this flag is true to create');
 		this.add_content();
 		this.hide_all();
 	}
@@ -63,6 +63,7 @@ class ElementModal {
 
 	make_checkbox(container:HTMLElement, id:string, label:string) {
 		let input = document.createElement('input');
+		input.classList.add('checkbox');
 		input.id = id;
 		input.setAttribute('type', 'checkbox');
 		container.appendChild(input);

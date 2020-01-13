@@ -41,12 +41,7 @@ var App = /** @class */ (function () {
             deck: [
                 {
                     title: 'My Card',
-                    content: [
-                        {
-                            type: 'paragraph',
-                            text: 'Hello world!'
-                        }
-                    ]
+                    content: []
                 }
             ]
         };
@@ -101,13 +96,13 @@ var CardTab = /** @class */ (function () {
     return CardTab;
 }());
 var ElementModal = /** @class */ (function () {
-    function ElementModal() {
+    function ElementModal(old_content) {
         var _this = this;
         var content = document.createElement('div');
         content.classList.add('settings');
         new Modal({
-            title: 'New Element',
-            confirm: 'Add New Element',
+            title: old_content ? 'Edit Element' : 'New Element',
+            confirm: old_content ? 'Save Changes' : 'Add New Element',
             cancel: 'Cancel',
             content: content,
             on_confirm: function () { return _this.add_element(); }
@@ -120,7 +115,7 @@ var ElementModal = /** @class */ (function () {
         content.appendChild(this.article_options = document.createElement('div'));
         content.appendChild(this.flag_options = document.createElement('div'));
         content.appendChild(this.points_options = document.createElement('div'));
-        this.make_input(content, 'content_flag', 'Check if this flag is true to create');
+        this.make_input(document.createElement('div'), 'content_flag', 'Check if this flag is true to create');
         this.add_content();
         this.hide_all();
     }
@@ -157,6 +152,7 @@ var ElementModal = /** @class */ (function () {
     };
     ElementModal.prototype.make_checkbox = function (container, id, label) {
         var input = document.createElement('input');
+        input.classList.add('checkbox');
         input.id = id;
         input.setAttribute('type', 'checkbox');
         container.appendChild(input);

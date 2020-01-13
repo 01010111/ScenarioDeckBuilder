@@ -313,3 +313,7 @@ pre {
 .hidden {
 	display: none;
 }
+
+.checkbox {
+	width: 32px !important;
+}

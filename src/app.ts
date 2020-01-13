@@ -36,12 +36,7 @@ class App {
 			deck: [
 				{
 					title: 'My Card',
-					content: [
-						{
-							type: 'paragraph',
-							text: 'Hello world!'
-						}
-					]
+					content: []
 				}
 			]
 		}
