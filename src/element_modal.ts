@@ -35,8 +35,10 @@ class ElementModal {
 		this.make_textarea(this.paragraph_options, 'p_text', 'Paragraph Text');
 		// button
 		this.make_input(this.button_options, 'b_text', 'Button Text');
-		this.make_input(this.button_options, 'b_url', 'Button Link');
+		this.make_dropdown(this.button_options, 'b_link', this.get_button_options(), 'Button Link', () => this.button_link_onchange());
+		this.make_input(this.button_options, 'b_url', 'Button Link URL');
 		this.make_checkbox(this.button_options, 'b_end', 'End Scenario?');
+		this.button_link_onchange();
 		// image
 		this.make_input(this.image_options, 'i_url', 'Image Source');
 		this.make_dropdown(this.image_options, 'i_display', ['padded', 'full-width'], 'Image Display');
@@ -53,8 +55,25 @@ class ElementModal {
 		this.make_input(this.points_options, 'p_amt', 'Amount of Points');
 	}
 
+	get_button_options() {
+		let out = ['URL'];
+		for (let card of App.deck.deck) if (App.current_card.title != card.title) out.push(card.title);
+		console.log(out);
+		return out;
+	}
+
+	button_link_onchange() {
+		let link = (document.getElementById('b_link') as HTMLSelectElement).value;
+		let url_input = (document.getElementById('b_url') as HTMLInputElement);
+		let url_input_label = (document.getElementById('b_url_label') as HTMLInputElement);
+		link == 'URL' ? url_input.classList.remove('hidden') : url_input.classList.add('hidden');
+		link == 'URL' ? url_input_label.classList.remove('hidden') : url_input_label.classList.add('hidden');
+	}
+
 	make_input(container:HTMLElement, id:string, label:string, text:string = '') {
-		container.appendChild(Util.make_label(label));
+		let _label = Util.make_label(label);
+		_label.id = id + '_label';
+		container.appendChild(_label);
 		let input = document.createElement('input');
 		input.id = id;
 		if (text.length > 0) input.value = text;
@@ -92,8 +111,8 @@ class ElementModal {
 			let value = (document.getElementById(id) as HTMLSelectElement).value;
 			onchange(value);
 		}
-		this.image_options.appendChild(Util.make_label(label));
-		this.image_options.appendChild(dropdown);
+		container.appendChild(Util.make_label(label));
+		container.appendChild(dropdown);
 	}
 
 	hide_all() {
@@ -169,18 +188,19 @@ class ElementModal {
 			alert('Button must have text!');
 			return false;
 		}
-		let b_url = (document.getElementById('b_url') as HTMLInputElement).value;
+		let b_url = (document.getElementById('b_link') as HTMLInputElement).value;
+		if (b_url == 'URL') b_url = (document.getElementById('b_url') as HTMLInputElement).value;
 		let b_end = (document.getElementById('b_end') as HTMLInputElement).checked;
 		if (b_url.length == 0 && !b_end) {
 			alert('Button must have a URL or End the Scenario!');
 			return false;
 		}
-		this.add_new_content({
+		let content:Content = {
 			type: 'button',
 			text: b_text,
-			url: b_url,
-			end: b_end
-		});
+		};
+		b_end ? content.end = true : content.url = b_url;
+		this.add_new_content(content);
 		return true;
 	}
 

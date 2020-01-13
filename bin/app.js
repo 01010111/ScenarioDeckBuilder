@@ -120,12 +120,15 @@ var ElementModal = /** @class */ (function () {
         this.hide_all();
     }
     ElementModal.prototype.add_content = function () {
+        var _this = this;
         // paragraph
         this.make_textarea(this.paragraph_options, 'p_text', 'Paragraph Text');
         // button
         this.make_input(this.button_options, 'b_text', 'Button Text');
-        this.make_input(this.button_options, 'b_url', 'Button Link');
+        this.make_dropdown(this.button_options, 'b_link', this.get_button_options(), 'Button Link', function () { return _this.button_link_onchange(); });
+        this.make_input(this.button_options, 'b_url', 'Button Link URL');
         this.make_checkbox(this.button_options, 'b_end', 'End Scenario?');
+        this.button_link_onchange();
         // image
         this.make_input(this.image_options, 'i_url', 'Image Source');
         this.make_dropdown(this.image_options, 'i_display', ['padded', 'full-width'], 'Image Display');
@@ -141,9 +144,28 @@ var ElementModal = /** @class */ (function () {
         // points
         this.make_input(this.points_options, 'p_amt', 'Amount of Points');
     };
+    ElementModal.prototype.get_button_options = function () {
+        var out = ['URL'];
+        for (var _i = 0, _a = App.deck.deck; _i < _a.length; _i++) {
+            var card = _a[_i];
+            if (App.current_card.title != card.title)
+                out.push(card.title);
+        }
+        console.log(out);
+        return out;
+    };
+    ElementModal.prototype.button_link_onchange = function () {
+        var link = document.getElementById('b_link').value;
+        var url_input = document.getElementById('b_url');
+        var url_input_label = document.getElementById('b_url_label');
+        link == 'URL' ? url_input.classList.remove('hidden') : url_input.classList.add('hidden');
+        link == 'URL' ? url_input_label.classList.remove('hidden') : url_input_label.classList.add('hidden');
+    };
     ElementModal.prototype.make_input = function (container, id, label, text) {
         if (text === void 0) { text = ''; }
-        container.appendChild(Util.make_label(label));
+        var _label = Util.make_label(label);
+        _label.id = id + '_label';
+        container.appendChild(_label);
         var input = document.createElement('input');
         input.id = id;
         if (text.length > 0)
@@ -184,8 +206,8 @@ var ElementModal = /** @class */ (function () {
                 var value = document.getElementById(id).value;
                 onchange(value);
             };
-        this.image_options.appendChild(Util.make_label(label));
-        this.image_options.appendChild(dropdown);
+        container.appendChild(Util.make_label(label));
+        container.appendChild(dropdown);
     };
     ElementModal.prototype.hide_all = function () {
         for (var _i = 0, _a = [
@@ -274,18 +296,20 @@ var ElementModal = /** @class */ (function () {
             alert('Button must have text!');
             return false;
         }
-        var b_url = document.getElementById('b_url').value;
+        var b_url = document.getElementById('b_link').value;
+        if (b_url == 'URL')
+            b_url = document.getElementById('b_url').value;
         var b_end = document.getElementById('b_end').checked;
         if (b_url.length == 0 && !b_end) {
             alert('Button must have a URL or End the Scenario!');
             return false;
         }
-        this.add_new_content({
+        var content = {
             type: 'button',
             text: b_text,
-            url: b_url,
-            end: b_end
-        });
+        };
+        b_end ? content.end = true : content.url = b_url;
+        this.add_new_content(content);
         return true;
     };
     ElementModal.prototype.validate_image = function () {
