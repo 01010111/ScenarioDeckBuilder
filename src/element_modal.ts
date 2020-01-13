@@ -40,7 +40,7 @@ class ElementModal {
 		this.make_checkbox(this.button_options, 'b_end', 'End Scenario?');
 		this.button_link_onchange();
 		// image
-		this.make_input(this.image_options, 'i_url', 'Image Source');
+		this.make_input(this.image_options, 'i_url', 'Source URL');
 		this.make_dropdown(this.image_options, 'i_display', ['padded', 'full-width'], 'Image Display');
 		// textbox
 		this.make_textarea(this.textbox_options, 'tb_text', 'Textbox Text');
