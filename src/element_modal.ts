@@ -179,7 +179,7 @@ class ElementModal {
 		let i_display = (document.getElementById('i_display') as HTMLSelectElement).value;
 		this.add_new_content({
 			type: 'image',
-			url: i_url,
+			src: i_url,
 			display: i_display
 		});
 		return true;

@@ -280,7 +280,7 @@ var ElementModal = /** @class */ (function () {
         var i_display = document.getElementById('i_display').value;
         this.add_new_content({
             type: 'image',
-            url: i_url,
+            src: i_url,
             display: i_display
         });
         return true;
