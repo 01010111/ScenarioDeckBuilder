@@ -18,13 +18,13 @@ class Modal {
 		modal.appendChild(options.content);
 		// buttons
 		let cancel = document.createElement('div');
-		cancel.classList.add('button', 'bottom', 'secondary');
+		cancel.classList.add('button', 'right', 'secondary');
 		cancel.innerText = options.cancel as string;
 		cancel.onclick = () => this.close();
 		let this_modal = this;
 		if (options.confirm && options.on_confirm) {
 			let confirm = document.createElement('div');
-			confirm.classList.add('button', 'bottom');
+			confirm.classList.add('button', 'right');
 			confirm.innerText = options.confirm as string;
 			confirm.onclick = () => {
 				if ((options.on_confirm as () => boolean)()) this_modal.close();

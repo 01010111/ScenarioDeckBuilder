@@ -6,6 +6,7 @@ class TopBar {
 	export:HTMLDivElement;
 	preview:HTMLDivElement;
 	nodes:HTMLDivElement;
+	new_scenario:HTMLDivElement;
 	constructor() {
 		this.element = document.getElementById('top_bar') as HTMLDivElement;
 		this.title_input = document.getElementById('title_input') as HTMLInputElement;
@@ -23,6 +24,18 @@ class TopBar {
 		this.preview.onclick = () => new Preview();
 		this.nodes = document.getElementById('node_btn') as HTMLDivElement;
 		this.nodes.onclick = () => new Nodemap(App.current_card.title);
+		this.new_scenario = document.getElementById('new_scenario') as HTMLDivElement;
+		let new_scenario_content = document.createElement('div');
+		new_scenario_content.innerText = 'Create a new Scenario? Unsaved changes will be lost!';
+		this.new_scenario.onclick = () => new Modal({
+			content: new_scenario_content,
+			title: 'New Scenario',
+			confirm: 'Make New Scenario',
+			on_confirm: () => {
+				document.location.reload();
+				return true;
+			}
+		})
 	}
 	load() {
 		this.title_input.value = App.deck.title;

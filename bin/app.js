@@ -443,13 +443,13 @@ var Modal = /** @class */ (function () {
         modal.appendChild(options.content);
         // buttons
         var cancel = document.createElement('div');
-        cancel.classList.add('button', 'bottom', 'secondary');
+        cancel.classList.add('button', 'right', 'secondary');
         cancel.innerText = options.cancel;
         cancel.onclick = function () { return _this.close(); };
         var this_modal = this;
         if (options.confirm && options.on_confirm) {
             var confirm_1 = document.createElement('div');
-            confirm_1.classList.add('button', 'bottom');
+            confirm_1.classList.add('button', 'right');
             confirm_1.innerText = options.confirm;
             confirm_1.onclick = function () {
                 if (options.on_confirm())
@@ -686,7 +686,7 @@ var Settings = /** @class */ (function () {
         bg_src.value = App.deck.bg_src ? App.deck.bg_src : '';
         content.appendChild(bg_src);
         // content links
-        content.appendChild(Util.make_label('Content Links'));
+        content.appendChild(Util.make_label('Endscreen Content Links Overrides'));
         var content_links = document.createElement('textarea');
         content_links.classList.add('content_link_area');
         content_links.value = App.deck.content_links ? JSON.stringify(App.deck.content_links, null, '\t') : '[]';
@@ -850,7 +850,17 @@ var TopBar = /** @class */ (function () {
         this.nodes = document.getElementById('node_btn');
         this.nodes.onclick = function () { return new Nodemap(App.current_card.title); };
         this.new_scenario = document.getElementById('new_scenario');
-        this.new_scenario.onclick = function () { return document.location.reload(); };
+        var new_scenario_content = document.createElement('div');
+        new_scenario_content.innerText = 'Create a new Scenario? Unsaved changes will be lost!';
+        this.new_scenario.onclick = function () { return new Modal({
+            content: new_scenario_content,
+            title: 'New Scenario',
+            confirm: 'Make New Scenario',
+            on_confirm: function () {
+                document.location.reload();
+                return true;
+            }
+        }); };
     }
     TopBar.prototype.load = function () {
         this.title_input.value = App.deck.title;

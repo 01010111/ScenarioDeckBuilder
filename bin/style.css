@@ -26,15 +26,15 @@ h1 {
 }
 .button {
 	background-color:#48F;
-	padding: 16px 32px;
 	color: white;
 	border-radius: 4px;
-	margin: 12px;
-	float: right;
 	box-shadow: 0 4px 0 #24D;
 	border-top: 1px solid #8DF;
 	cursor: pointer;
 	text-align: center;
+	padding: 8px 16px;
+    margin: 20px 8px;
+    line-height: 1em;
 }
 .button.secondary {
 	background-color:#FFF;
@@ -46,10 +46,6 @@ h1 {
 	box-shadow: none;
 	border-top: none;
 	text-decoration: underline;
-}
-.button.bottom {
-	position: relative;
-	float: right;
 }
 
 .app_container {
@@ -325,4 +321,11 @@ pre {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 14px;
 	height: auto;
+}
+
+.left {
+	float: left;
+}
+.right {
+	float: right;
 }
