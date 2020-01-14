@@ -67,7 +67,6 @@ class ElementModal {
 	get_button_options() {
 		let out = ['URL'];
 		for (let card of App.deck.deck) if (App.current_card.title != card.title) out.push(card.title);
-		console.log(out);
 		return out;
 	}
 
