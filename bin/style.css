@@ -84,7 +84,7 @@ h1 {
 	padding: 8px;
 	border: 0;
 	font-size: 16px;
-	height: calc(100% - 128px);
+	height: calc(100vh - 360px);
 	tab-size: 4;
 	background-color: rgba(0, 0, 0, 0);
 	width: 100%;
