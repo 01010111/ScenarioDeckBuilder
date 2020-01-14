@@ -44,7 +44,7 @@ class Settings {
 		bg_src.value = App.deck.bg_src ? App.deck.bg_src : '';
 		content.appendChild(bg_src);
 		// content links
-		content.appendChild(Util.make_label('Content Links'));
+		content.appendChild(Util.make_label('Endscreen Content Links Overrides'));
 		let content_links = document.createElement('textarea');
 		content_links.classList.add('content_link_area');
 		content_links.value = App.deck.content_links ? JSON.stringify(App.deck.content_links, null, '\t') : '[]';
