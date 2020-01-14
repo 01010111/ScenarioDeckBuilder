@@ -167,7 +167,6 @@ var ElementModal = /** @class */ (function () {
             if (App.current_card.title != card.title)
                 out.push(card.title);
         }
-        console.log(out);
         return out;
     };
     ElementModal.prototype.button_link_onchange = function () {
@@ -314,8 +313,11 @@ var ElementModal = /** @class */ (function () {
             return false;
         }
         var b_url = document.getElementById('b_link').value;
-        if (b_url == 'URL')
+        if (b_url == 'URL') {
             b_url = document.getElementById('b_url').value;
+            if (b_url.indexOf('http') == -1)
+                b_url = 'http://' + b_url;
+        }
         var b_end = document.getElementById('b_end').checked;
         if (b_url.length == 0 && !b_end) {
             alert('Button must have a URL or End the Scenario!');
@@ -847,6 +849,8 @@ var TopBar = /** @class */ (function () {
         this.preview.onclick = function () { return new Preview(); };
         this.nodes = document.getElementById('node_btn');
         this.nodes.onclick = function () { return new Nodemap(App.current_card.title); };
+        this.new_scenario = document.getElementById('new_scenario');
+        this.new_scenario.onclick = function () { return document.location.reload(); };
     }
     TopBar.prototype.load = function () {
         this.title_input.value = App.deck.title;

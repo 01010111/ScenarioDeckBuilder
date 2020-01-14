@@ -198,7 +198,10 @@ class ElementModal {
 			return false;
 		}
 		let b_url = (document.getElementById('b_link') as HTMLInputElement).value;
-		if (b_url == 'URL') b_url = (document.getElementById('b_url') as HTMLInputElement).value;
+		if (b_url == 'URL') {
+			b_url = (document.getElementById('b_url') as HTMLInputElement).value;
+			if (b_url.indexOf('http') == -1) b_url = 'http://' + b_url;
+		}
 		let b_end = (document.getElementById('b_end') as HTMLInputElement).checked;
 		if (b_url.length == 0 && !b_end) {
 			alert('Button must have a URL or End the Scenario!');
