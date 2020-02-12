@@ -1112,6 +1112,14 @@ var Validation = /** @class */ (function () {
                     if (!content.src)
                         throw 'Image content must include src!';
                     break;
+                case 'audio':
+                    if (!content.src)
+                        throw 'Audio content must include src!';
+                    break;
+                case 'video':
+                    if (!content.src)
+                        throw 'Video content must include src!';
+                    break;
                 case 'textbox':
                     if (!content.text)
                         throw 'Textbox content must include text!';
