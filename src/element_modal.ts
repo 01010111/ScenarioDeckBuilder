@@ -6,6 +6,8 @@ class ElementModal {
 	article_options:HTMLDivElement;
 	flag_options:HTMLDivElement;
 	points_options:HTMLDivElement;
+	audio_options:HTMLDivElement;
+	video_options:HTMLDivElement;
 
 	constructor(old_content?:Content) {
 		let content = document.createElement('div');
@@ -21,6 +23,8 @@ class ElementModal {
 		content.appendChild(this.paragraph_options = document.createElement('div'));
 		content.appendChild(this.button_options = document.createElement('div'));
 		content.appendChild(this.image_options = document.createElement('div'));
+		content.appendChild(this.audio_options = document.createElement('div'));
+		content.appendChild(this.video_options = document.createElement('div'));
 		content.appendChild(this.textbox_options = document.createElement('div'));
 		content.appendChild(this.article_options = document.createElement('div'));
 		content.appendChild(this.flag_options = document.createElement('div'));
@@ -49,6 +53,10 @@ class ElementModal {
 		// image
 		this.make_input(this.image_options, 'i_url', 'Source URL');
 		this.make_dropdown(this.image_options, 'i_display', ['padded', 'full-width'], 'Image Display');
+		// audio
+		this.make_input(this.audio_options, 'aud_src', 'Source URL');
+		// video
+		this.make_input(this.video_options, 'vid_src', 'Source URL');
 		// textbox
 		this.make_textarea(this.textbox_options, 'tb_text', 'Textbox Text');
 		// article
@@ -129,6 +137,8 @@ class ElementModal {
 			this.paragraph_options,
 			this.button_options,
 			this.image_options,
+			this.audio_options,
+			this.video_options,
 			this.textbox_options,
 			this.article_options,
 			this.flag_options,
@@ -139,7 +149,7 @@ class ElementModal {
 	make_selector():HTMLElement {
 		let out = document.createElement('select');
 		out.id = 'element_selector';
-		for (let el of ['Choose Element Type', 'paragraph', 'button', 'image', 'textbox', 'article', 'flag', 'points']) {
+		for (let el of ['Choose Element Type', 'paragraph', 'button', 'image', 'audio', 'video', 'textbox', 'article', 'flag', 'points']) {
 			var el_option = document.createElement('option');
 			el_option.value = el;
 			el_option.innerText = el;
@@ -156,6 +166,8 @@ class ElementModal {
 			case 'paragraph': this.paragraph_options.classList.remove('hidden'); break;
 			case 'button': this.button_options.classList.remove('hidden'); break;
 			case 'image': this.image_options.classList.remove('hidden'); break;
+			case 'audio': this.audio_options.classList.remove('hidden'); break;
+			case 'video': this.video_options.classList.remove('hidden'); break;
 			case 'textbox': this.textbox_options.classList.remove('hidden'); break;
 			case 'article': this.article_options.classList.remove('hidden'); break;
 			case 'flag': this.flag_options.classList.remove('hidden'); break;
@@ -170,6 +182,8 @@ class ElementModal {
 			case 'paragraph': return this.validate_paragraph();
 			case 'button': return this.validate_button();
 			case 'image': return this.validate_image();
+			case 'audio': return this.validate_audio();
+			case 'video': return this.validate_video();
 			case 'textbox': return this.validate_textbox();
 			case 'article': return this.validate_article();
 			case 'flag': return this.validate_flag();
@@ -227,6 +241,34 @@ class ElementModal {
 			type: 'image',
 			src: i_url,
 			display: i_display
+		});
+		return true;
+	}
+
+	validate_audio():boolean {
+		let aud_src = (document.getElementById('aud_src') as HTMLInputElement).value;
+		if (aud_src.length == 0) {
+			alert('Audio must have a URL!');
+			return false;
+		}
+		let i_display = (document.getElementById('i_display') as HTMLSelectElement).value;
+		this.add_new_content({
+			type: 'audio',
+			src: aud_src,
+		});
+		return true;
+	}
+
+	validate_video():boolean {
+		let vid_src = (document.getElementById('vid_src') as HTMLInputElement).value;
+		if (vid_src.length == 0) {
+			alert('Video must have a URL!');
+			return false;
+		}
+		let i_display = (document.getElementById('i_display') as HTMLSelectElement).value;
+		this.add_new_content({
+			type: 'video',
+			src: vid_src,
 		});
 		return true;
 	}

@@ -38,12 +38,7 @@ var App = /** @class */ (function () {
             description: 'New Situation Deck',
             bg_src: 'assets/business.png',
             first_card: 'My Card',
-            deck: [
-                {
-                    title: 'My Card',
-                    content: []
-                }
-            ]
+            deck: [{ title: 'My Card', content: [] }]
         };
     };
     App.get_json = function () {
@@ -111,6 +106,8 @@ var ElementModal = /** @class */ (function () {
         content.appendChild(this.paragraph_options = document.createElement('div'));
         content.appendChild(this.button_options = document.createElement('div'));
         content.appendChild(this.image_options = document.createElement('div'));
+        content.appendChild(this.audio_options = document.createElement('div'));
+        content.appendChild(this.video_options = document.createElement('div'));
         content.appendChild(this.textbox_options = document.createElement('div'));
         content.appendChild(this.article_options = document.createElement('div'));
         content.appendChild(this.flag_options = document.createElement('div'));
@@ -146,6 +143,10 @@ var ElementModal = /** @class */ (function () {
         // image
         this.make_input(this.image_options, 'i_url', 'Source URL');
         this.make_dropdown(this.image_options, 'i_display', ['padded', 'full-width'], 'Image Display');
+        // audio
+        this.make_input(this.audio_options, 'aud_src', 'Source URL');
+        // video
+        this.make_input(this.video_options, 'vid_src', 'Source URL');
         // textbox
         this.make_textarea(this.textbox_options, 'tb_text', 'Textbox Text');
         // article
@@ -230,6 +231,8 @@ var ElementModal = /** @class */ (function () {
             this.paragraph_options,
             this.button_options,
             this.image_options,
+            this.audio_options,
+            this.video_options,
             this.textbox_options,
             this.article_options,
             this.flag_options,
@@ -243,7 +246,7 @@ var ElementModal = /** @class */ (function () {
         var _this = this;
         var out = document.createElement('select');
         out.id = 'element_selector';
-        for (var _i = 0, _a = ['Choose Element Type', 'paragraph', 'button', 'image', 'textbox', 'article', 'flag', 'points']; _i < _a.length; _i++) {
+        for (var _i = 0, _a = ['Choose Element Type', 'paragraph', 'button', 'image', 'audio', 'video', 'textbox', 'article', 'flag', 'points']; _i < _a.length; _i++) {
             var el = _a[_i];
             var el_option = document.createElement('option');
             el_option.value = el;
@@ -266,6 +269,12 @@ var ElementModal = /** @class */ (function () {
             case 'image':
                 this.image_options.classList.remove('hidden');
                 break;
+            case 'audio':
+                this.audio_options.classList.remove('hidden');
+                break;
+            case 'video':
+                this.video_options.classList.remove('hidden');
+                break;
             case 'textbox':
                 this.textbox_options.classList.remove('hidden');
                 break;
@@ -287,6 +296,8 @@ var ElementModal = /** @class */ (function () {
             case 'paragraph': return this.validate_paragraph();
             case 'button': return this.validate_button();
             case 'image': return this.validate_image();
+            case 'audio': return this.validate_audio();
+            case 'video': return this.validate_video();
             case 'textbox': return this.validate_textbox();
             case 'article': return this.validate_article();
             case 'flag': return this.validate_flag();
@@ -342,6 +353,32 @@ var ElementModal = /** @class */ (function () {
             type: 'image',
             src: i_url,
             display: i_display
+        });
+        return true;
+    };
+    ElementModal.prototype.validate_audio = function () {
+        var aud_src = document.getElementById('aud_src').value;
+        if (aud_src.length == 0) {
+            alert('Audio must have a URL!');
+            return false;
+        }
+        var i_display = document.getElementById('i_display').value;
+        this.add_new_content({
+            type: 'audio',
+            src: aud_src,
+        });
+        return true;
+    };
+    ElementModal.prototype.validate_video = function () {
+        var vid_src = document.getElementById('vid_src').value;
+        if (vid_src.length == 0) {
+            alert('Video must have a URL!');
+            return false;
+        }
+        var i_display = document.getElementById('i_display').value;
+        this.add_new_content({
+            type: 'video',
+            src: vid_src,
         });
         return true;
     };

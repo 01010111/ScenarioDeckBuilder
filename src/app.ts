@@ -33,12 +33,7 @@ class App {
 			description: 'New Situation Deck',
 			bg_src: 'assets/business.png',
 			first_card: 'My Card',
-			deck: [
-				{
-					title: 'My Card',
-					content: []
-				}
-			]
+			deck: [ { title: 'My Card', content: [] } ]
 		}
 	}
 	static get_json() {

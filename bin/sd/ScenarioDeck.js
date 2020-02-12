@@ -35,6 +35,7 @@ App.init = function(config,load) {
 	if(load == null) {
 		load = true;
 	}
+	BOBAPI.serve_has_played();
 	App.deck = config.deck;
 	App.theme = App.get_theme(config.theme);
 	App.config = config;
@@ -55,7 +56,7 @@ App.init = function(config,load) {
 			while(_g11 < _g21.length) {
 				var item = _g21[_g11];
 				++_g11;
-				if(item.type.toLowerCase() == "image" || item.type.toLowerCase() == "article") {
+				if(item.type.toLowerCase() == "image" || item.type.toLowerCase() == "article" || item.type.toLowerCase() == "video") {
 					_g.push(item.src);
 				}
 			}
@@ -70,7 +71,7 @@ App.init = function(config,load) {
 		while(_g3 < _g4.length) {
 			var image = _g4[_g3];
 			++_g3;
-			loader.add({ url : image, crossOrigin : ""});
+			loader.add({ url : image, crossOrigin : true});
 		}
 		loader.on("complete",function() {
 			return App.i = new App();
@@ -80,7 +81,7 @@ App.init = function(config,load) {
 	if(App.theme.fonts.length == 0) {
 		load_images();
 	} else {
-		WebFont.load({ custom : { families : zero_extensions_ArrayExt.remove_duplicates(zero_extensions_ArrayExt.merge(App.theme.fonts,["Avenir Next Demi","Avenir Next Bold"])), urls : ["include/fonts.css"]}, active : load_images});
+		WebFont.load({ custom : { families : zero_extensions_ArrayExt.remove_duplicates(zero_extensions_ArrayExt.merge(App.theme.fonts,["Avenir Next Demi","Avenir Next Bold"])), urls : ["../../common/fonts.css"]}, active : load_images, inactive : load_images});
 	}
 };
 App.get_theme = function(theme) {
@@ -303,6 +304,168 @@ js_Boot.__string_rec = function(o,s) {
 		return String(o);
 	}
 };
+var objects_AudioPlayer = function(src) {
+	this.do_transport = false;
+	this.transport_padding_left = 48;
+	this.transport_margins = zero_utilities__$Vec2_Vec2_$Impl_$.from_array_int([48,48]);
+	var _gthis = this;
+	PIXI.Container.call(this);
+	var source = window.document.createElement("source");
+	source.src = src;
+	this.audio = window.document.createElement("audio");
+	this.audio.appendChild(source);
+	this.audio.onloadeddata = function() {
+		util_ResizeUtil.resize();
+		_gthis.play();
+		return;
+	};
+	this.audio.onended = function() {
+		_gthis.set_pause();
+		return;
+	};
+	this.bg = new PIXI.Graphics();
+	this.bg.beginFill(0);
+	this.bg.drawRect(0,0,1,1);
+	this.addChild(this.bg);
+	this.make_transport();
+	this.resize();
+};
+objects_AudioPlayer.__name__ = true;
+objects_AudioPlayer.__super__ = PIXI.Container;
+objects_AudioPlayer.prototype = $extend(PIXI.Container.prototype,{
+	make_transport: function() {
+		var _gthis = this;
+		this.transport = new PIXI.Container();
+		this.transport_bar = new PIXI.Graphics();
+		this.transport_marker = new PIXI.Graphics();
+		this.transport_marker.beginFill(0,0.05);
+		this.transport_marker.drawCircle(0,0,8);
+		this.transport_marker.endFill();
+		this.transport_marker.beginFill(0,0.05);
+		this.transport_marker.drawCircle(0,0,9);
+		this.transport_marker.endFill();
+		this.transport_marker.beginFill(0,0.05);
+		this.transport_marker.drawCircle(0,0,10);
+		this.transport_marker.endFill();
+		this.transport_marker.beginFill(0,0.05);
+		this.transport_marker.drawCircle(0,0,11);
+		this.transport_marker.endFill();
+		this.transport_marker.beginFill(16777215);
+		this.transport_marker.drawCircle(0,0,8);
+		this.transport_marker.endFill();
+		this.transport_bar.interactive = true;
+		this.transport_bar.buttonMode = true;
+		this.transport_bar.on("pointerdown",function(e) {
+			_gthis.do_transport = true;
+			_gthis.go_to_time(e);
+			return;
+		});
+		this.transport_bar.on("pointerup",function(e1) {
+			return _gthis.do_transport = false;
+		});
+		this.transport_bar.on("pointerout",function(e2) {
+			return _gthis.do_transport = false;
+		});
+		this.transport_bar.on("pointermove",function(e3) {
+			if(_gthis.do_transport) {
+				_gthis.go_to_time(e3);
+			}
+			return;
+		});
+		this.transport.addChild(this.transport_bar);
+		this.transport.addChild(this.transport_marker);
+		this.transport.addChild(this.make_pause_button());
+		this.addChild(this.transport);
+		this.set_transport_position();
+		this.draw_transport();
+	}
+	,make_pause_button: function() {
+		var _gthis = this;
+		var size = zero_utilities__$Vec2_Vec2_$Impl_$.from_array_int([32,32]);
+		this.pause_container = new PIXI.Container();
+		this.pause_container.scale.set(0.5);
+		this.pause_container.interactive = true;
+		this.pause_container.buttonMode = true;
+		this.pause_container.on("pointertap",function() {
+			_gthis.pause();
+			return;
+		});
+		var tmp = -zero_utilities__$Vec2_Vec2_$Impl_$.get_x(size);
+		var tmp1 = -zero_utilities__$Vec2_Vec2_$Impl_$.get_y(size);
+		var tmp2 = zero_utilities__$Vec2_Vec2_$Impl_$.get_x(size) * 2;
+		var tmp3 = zero_utilities__$Vec2_Vec2_$Impl_$.get_y(size) * 2;
+		this.pause_container.hitArea = new PIXI.Rectangle(tmp,tmp1,tmp2,tmp3);
+		this.play_btn = new PIXI.Graphics();
+		this.play_btn.beginFill(16777215);
+		this.play_btn.drawPolygon([-zero_utilities__$Vec2_Vec2_$Impl_$.get_x(size) / 2,-zero_utilities__$Vec2_Vec2_$Impl_$.get_y(size) / 2,zero_utilities__$Vec2_Vec2_$Impl_$.get_x(size) / 2,0,-zero_utilities__$Vec2_Vec2_$Impl_$.get_x(size) / 2,zero_utilities__$Vec2_Vec2_$Impl_$.get_y(size) / 2]);
+		this.play_btn.endFill();
+		this.pause_btn = new PIXI.Graphics();
+		this.pause_btn.beginFill(16777215);
+		this.pause_btn.drawRect(-zero_utilities__$Vec2_Vec2_$Impl_$.get_x(size) / 2,-zero_utilities__$Vec2_Vec2_$Impl_$.get_y(size) / 2,zero_utilities__$Vec2_Vec2_$Impl_$.get_x(size) / 3,zero_utilities__$Vec2_Vec2_$Impl_$.get_y(size));
+		this.pause_btn.drawRect(zero_utilities__$Vec2_Vec2_$Impl_$.get_x(size) / 6,-zero_utilities__$Vec2_Vec2_$Impl_$.get_y(size) / 2,zero_utilities__$Vec2_Vec2_$Impl_$.get_x(size) / 3,zero_utilities__$Vec2_Vec2_$Impl_$.get_y(size));
+		this.pause_btn.endFill();
+		this.pause_container.addChild(this.play_btn);
+		this.pause_container.addChild(this.pause_btn);
+		zero_utilities__$Vec2_Vec2_$Impl_$.pool.push(zero_utilities__$Vec2_Vec2_$Impl_$.from_array_float(size));
+		size = null;
+		return this.pause_container;
+	}
+	,set_transport_position: function() {
+		if(this.transport_marker == null) {
+			return;
+		}
+		var t1 = this.audio.currentTime / this.audio.duration / 1;
+		this.transport_marker.position.set((1 - t1) * (zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) + this.transport_padding_left) + t1 * (App.i.renderer.width - App.theme.padding * 2 - zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins)),zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins));
+		zero_utilities_Timer.get(0.1,$bind(this,this.set_transport_position));
+	}
+	,draw_transport: function() {
+		this.bg.scale.set(App.i.renderer.width - App.theme.padding * 2,zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2);
+		this.transport_bar.clear();
+		this.transport_bar.beginFill(16777215);
+		this.transport_bar.drawRoundedRect(zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) + this.transport_padding_left,zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2 - zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) - 4,this.bg.scale.x - zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) * 2 - this.transport_padding_left,8,4);
+		var tmp = zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) + this.transport_padding_left;
+		var tmp1 = zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2 - zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2;
+		var tmp2 = this.bg.scale.x - zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) * 2 - this.transport_padding_left;
+		var tmp3 = zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2;
+		this.transport_bar.hitArea = new PIXI.Rectangle(tmp,tmp1,tmp2,tmp3);
+		this.transport_bar.endFill();
+	}
+	,play: function() {
+		this.audio.play();
+		this.play_btn.alpha = 0;
+		this.pause_btn.alpha = 1;
+	}
+	,pause: function() {
+		if(this.audio.paused) {
+			this.play();
+			return;
+		}
+		this.set_pause();
+	}
+	,set_pause: function() {
+		this.audio.pause();
+		this.play_btn.alpha = 1;
+		this.pause_btn.alpha = 0;
+	}
+	,go_to_time: function(e) {
+		var x = e.data.global.x;
+		x -= App.theme.padding;
+		x -= zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) + this.transport_padding_left;
+		var t1 = x / (App.i.renderer.width - App.theme.padding * 2 - zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) * 2 - this.transport_padding_left);
+		x = (1 - t1) * 0 + t1;
+		this.audio.currentTime = this.audio.duration * x;
+	}
+	,resize: function() {
+		this.x = App.theme.padding;
+		this.pause_container.position.set((this.transport_padding_left + zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins)) / 2,zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2 - zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins));
+		this.draw_transport();
+	}
+	,destroy: function(options) {
+		this.audio.pause();
+		this.audio.remove();
+		PIXI.Container.prototype.destroy.call(this,options);
+	}
+});
 var objects_ContentContainer = function() {
 	this.content_array = [];
 	this.loaded = false;
@@ -366,6 +529,9 @@ objects_ContentContainer.prototype = $extend(PIXI.Container.prototype,{
 			case "article":
 				content_item = App.theme.load_article(item.text,item.src,item.url);
 				break;
+			case "audio":
+				content_item = App.theme.load_audio(item.src);
+				break;
 			case "button":
 				content_item = App.theme.load_button(item.text,item.end != null && item.end ? "app____end" : item.url);
 				break;
@@ -385,6 +551,9 @@ objects_ContentContainer.prototype = $extend(PIXI.Container.prototype,{
 				break;
 			case "textbox":
 				content_item = App.theme.load_textbox(item.text);
+				break;
+			case "video":
+				content_item = App.theme.load_video(item.src);
 				break;
 			default:
 				content_item = new PIXI.Container();
@@ -436,12 +605,13 @@ objects_ContentContainer.prototype = $extend(PIXI.Container.prototype,{
 var objects_EndScreen = function() {
 	var _gthis = this;
 	PIXI.Container.call(this);
+	BOBAPI.serve_completed();
 	this.bg = new PIXI.Graphics();
 	this.bg.beginFill(0,0.5);
 	this.bg.drawRect(0,0,1,1);
-	this.title = new PIXI.Text(App.config.title,{ fontFamily : "Avenir Next Demi", fontSize : 36, align : "left", fill : 16777215, wordWrap : true});
-	this.subtitle = new PIXI.Text(App.config.subtitle.toUpperCase(),{ fontFamily : "Avenir Next Bold", fontSize : 18, align : "left", fill : 16777215});
-	this.bob_pts = new PIXI.Text("Points earned: " + util_PointsManager.get_total(),{ fontFamily : "Avenir Next Bold", fontSize : 18, align : "left", fill : 16777215});
+	this.title = new PIXI.Text(App.config.title,{ fontFamily : "Avenir Nxt Demi", fontSize : 36, align : "left", fill : 16777215, wordWrap : true});
+	this.subtitle = new PIXI.Text(App.config.subtitle.toUpperCase(),{ fontFamily : "Avenir Nxt Bold", fontSize : 18, align : "left", fill : 16777215});
+	this.bob_pts = new PIXI.Text("Points earned: " + util_PointsManager.get_total(),{ fontFamily : "Avenir Nxt Bold", fontSize : 18, align : "left", fill : 16777215});
 	this.replay = new PIXI.Graphics();
 	this.replay.beginFill(16777215);
 	this.replay.drawRoundedRect(0,0,142,48,24);
@@ -452,7 +622,7 @@ var objects_EndScreen = function() {
 		App.restart();
 		return;
 	});
-	var r_text = new PIXI.Text("Replay",{ fontFamily : "Avenir Next Demi", fontSize : 18, fill : 0});
+	var r_text = new PIXI.Text("Replay",{ fontFamily : "Avenir Nxt Demi", fontSize : 18, fill : 0});
 	r_text.anchor.set(0.5);
 	r_text.position.set(71,24);
 	this.replay.addChild(r_text);
@@ -463,13 +633,14 @@ var objects_EndScreen = function() {
 	this.exit.interactive = true;
 	this.exit.buttonMode = true;
 	this.exit.on("pointertap",function() {
+		BOBAPI.exit();
 		return;
 	});
-	var e_text = new PIXI.Text("Exit",{ fontFamily : "Avenir Next Demi", fontSize : 18, fill : 16777215});
+	var e_text = new PIXI.Text("Exit",{ fontFamily : "Avenir Nxt Demi", fontSize : 18, fill : 16777215});
 	e_text.anchor.set(0.5);
 	e_text.position.set(71,24);
 	this.exit.addChild(e_text);
-	this.continue_text = new PIXI.Text("Recommended for you:",{ fontFamily : "Avenir Next Demi", fontSize : 24, align : "left", fill : 16777215});
+	this.continue_text = new PIXI.Text("Recommended for you:",{ fontFamily : "Avenir Nxt Demi", fontSize : 24, align : "left", fill : 16777215});
 	this.content_lane = new objects_ContentLane(App.config.content_links != null ? App.config.content_links : objects_EndScreen.get_articles(App.config.board));
 	var resize = function() {
 		if(App.i.renderer.width >= 480 && App.i.renderer.height >= 600) {
@@ -567,7 +738,7 @@ objects_ContentLane.prototype = $extend(PIXI.Container.prototype,{
 		content_container.addChild(alpha_mask);
 		var loader = new PIXI.loaders.Loader();
 		loader.reset();
-		loader.add({ url : data.image, crossOrigin : ""}).load(function() {
+		loader.add({ url : data.image, crossOrigin : true}).load(function() {
 			var content_graphic = PIXI.Sprite.fromImage(data.image);
 			content_graphic.scale.set(300 / content_graphic.width);
 			content_graphic.mask = alpha_mask;
@@ -575,7 +746,7 @@ objects_ContentLane.prototype = $extend(PIXI.Container.prototype,{
 			TweenMax.to(content_graphic,0.2,{ alpha : 1});
 			return content_container.addChild(content_graphic);
 		});
-		var content_title = new PIXI.Text(data.title,{ fontFamily : "Avenir Next Demi", fontSize : 16, fill : 0, align : "center", wordWrap : true, wordWrapWidth : 260});
+		var content_title = new PIXI.Text(data.title,{ fontFamily : "Avenir Nxt Demi", fontSize : 16, fill : 0, align : "center", wordWrap : true, wordWrapWidth : 260});
 		content_title.anchor.set(0.5);
 		content_title.position.set(150,220);
 		content_container.addChild(content_title);
@@ -645,11 +816,231 @@ objects_ContentLink.__name__ = true;
 objects_ContentLink.__super__ = PIXI.Graphics;
 objects_ContentLink.prototype = $extend(PIXI.Graphics.prototype,{
 });
+var objects_VideoPlayer = function(src) {
+	this.do_transport = false;
+	this.transport_margins = zero_utilities__$Vec2_Vec2_$Impl_$.from_array_int([64,16]);
+	var _gthis = this;
+	console.log("src/objects/VideoPlayer.hx:45:",src);
+	PIXI.Container.call(this);
+	var source = window.document.createElement("source");
+	source.src = src;
+	this.video = window.document.createElement("video");
+	this.video.setAttribute("playsinline","");
+	this.video.appendChild(source);
+	this.video.onloadeddata = function() {
+		util_ResizeUtil.resize();
+		return;
+	};
+	this.video.onended = function() {
+		_gthis.set_pause();
+		return;
+	};
+	this.texture = PIXI.Texture.fromVideo(this.video);
+	this.sprite = PIXI.Sprite.from(this.texture);
+	this.sprite.interactive = true;
+	this.sprite.buttonMode = true;
+	this.sprite.on("pointerover",function() {
+		_gthis.mouse_over();
+		return;
+	});
+	this.sprite.on("pointermove",function(e) {
+		_gthis.mouse_out(e);
+		return;
+	});
+	this.sprite.on("pointertap",function() {
+		_gthis.pause();
+		return;
+	});
+	this.addChild(this.sprite);
+	this.make_transport();
+	this.play();
+};
+objects_VideoPlayer.__name__ = true;
+objects_VideoPlayer.__super__ = PIXI.Container;
+objects_VideoPlayer.prototype = $extend(PIXI.Container.prototype,{
+	mouse_over: function() {
+		if(this.transport_tween != null && this.transport_tween.isActive()) {
+			this.transport_tween.kill();
+		}
+		this.transport.alpha = 1;
+	}
+	,mouse_out: function(e) {
+		var x = e.data.global.x;
+		var y = e.data.global.y;
+		if(x > this.x && x < this.x + this.sprite.width && y > this.y && y < this.y + this.sprite.height) {
+			return;
+		}
+		this.transport.alpha = 0;
+	}
+	,make_transport: function() {
+		var _gthis = this;
+		this.transport = new PIXI.Container();
+		this.transport_bg = new PIXI.Graphics();
+		this.transport_bar = new PIXI.Graphics();
+		this.transport_marker = new PIXI.Graphics();
+		this.transport_marker.beginFill(0,0.05);
+		this.transport_marker.drawCircle(0,0,8);
+		this.transport_marker.endFill();
+		this.transport_marker.beginFill(0,0.05);
+		this.transport_marker.drawCircle(0,0,9);
+		this.transport_marker.endFill();
+		this.transport_marker.beginFill(0,0.05);
+		this.transport_marker.drawCircle(0,0,10);
+		this.transport_marker.endFill();
+		this.transport_marker.beginFill(0,0.05);
+		this.transport_marker.drawCircle(0,0,11);
+		this.transport_marker.endFill();
+		this.transport_marker.beginFill(16777215);
+		this.transport_marker.drawCircle(0,0,8);
+		this.transport_marker.endFill();
+		this.transport_bar.interactive = true;
+		this.transport_bar.buttonMode = true;
+		this.transport_bar.on("pointerdown",function(e) {
+			return _gthis.do_transport = true;
+		});
+		this.transport_bar.on("pointerup",function(e1) {
+			return _gthis.do_transport = false;
+		});
+		this.transport_bar.on("pointerout",function(e2) {
+			return _gthis.do_transport = false;
+		});
+		this.transport_bar.on("pointermove",function(e3) {
+			if(_gthis.do_transport) {
+				_gthis.go_to_time(e3);
+			}
+			return;
+		});
+		this.transport.addChild(this.transport_bg);
+		this.transport.addChild(this.transport_bar);
+		this.transport.addChild(this.transport_marker);
+		this.addChild(this.transport);
+		this.set_transport_position();
+		this.draw_transport();
+		this.transport.alpha = 0;
+		this.transport.addChild(this.make_pause_button());
+		this.transport.addChild(this.make_mute_button());
+	}
+	,make_pause_button: function() {
+		this.pause_container = new PIXI.Container();
+		this.play_btn = new PIXI.Graphics();
+		this.play_btn.beginFill(16777215);
+		this.play_btn.drawPolygon([-8,-8,8,0,-8,8]);
+		this.play_btn.endFill();
+		this.pause_btn = new PIXI.Graphics();
+		this.pause_btn.beginFill(16777215);
+		this.pause_btn.drawRect(-8,-8,6,16);
+		this.pause_btn.drawRect(2,-8,6,16);
+		this.pause_btn.endFill();
+		this.pause_container.addChild(this.play_btn);
+		this.pause_container.addChild(this.pause_btn);
+		return this.pause_container;
+	}
+	,make_mute_button: function() {
+		var _gthis = this;
+		this.mute_container = new PIXI.Container();
+		this.unmute_btn = PIXI.Sprite.fromImage("../../common/images/audio_muted.png");
+		this.unmute_btn.anchor.set(0.5);
+		this.unmute_btn.scale.set(0.5);
+		this.mute_btn = PIXI.Sprite.fromImage("../../common/images/audio_unmuted.png");
+		this.mute_btn.anchor.set(0.5);
+		this.mute_btn.scale.set(0.5);
+		this.mute_container.addChild(this.unmute_btn);
+		this.mute_container.addChild(this.mute_btn);
+		this.mute_container.interactive = true;
+		this.mute_container.on("pointertap",function() {
+			_gthis.mute();
+			return;
+		});
+		this.update_mute_btns();
+		return this.mute_container;
+	}
+	,resize: function() {
+		this.x = App.theme.padding;
+		this.sprite.scale.set((App.i.renderer.width - App.theme.padding * 2) / this.texture.baseTexture.width);
+		this.pause_container.position.set(zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) / 2,this.sprite.height - zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins));
+		this.mute_container.position.set(this.sprite.width - zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) / 2,this.sprite.height - zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins));
+		this.draw_transport();
+	}
+	,draw_transport: function() {
+		this.transport_bg.clear();
+		this.transport_bg.beginFill(0,0.5);
+		this.transport_bg.drawRect(0,this.sprite.height - zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2,this.sprite.width,zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2);
+		this.transport_bg.endFill();
+		this.transport_bar.clear();
+		this.transport_bar.beginFill(16777215);
+		this.transport_bar.drawRoundedRect(zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins),this.sprite.height - zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) - 4,this.sprite.width - zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) * 2,8,4);
+		var tmp = zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins);
+		var tmp1 = this.sprite.height - zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2;
+		var tmp2 = this.sprite.width - zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) * 2;
+		var tmp3 = zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins) * 2;
+		this.transport_bar.hitArea = new PIXI.Rectangle(tmp,tmp1,tmp2,tmp3);
+		this.transport_bar.endFill();
+	}
+	,set_transport_position: function() {
+		if(this.transport_marker == null) {
+			return;
+		}
+		var t1 = this.video.currentTime / this.video.duration / 1;
+		this.transport_marker.position.set((1 - t1) * zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) + t1 * (this.sprite.width - zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins)),this.sprite.height - zero_utilities__$Vec2_Vec2_$Impl_$.get_y(this.transport_margins));
+		zero_utilities_Timer.get(0.1,$bind(this,this.set_transport_position));
+	}
+	,go_to_time: function(e) {
+		this.temp_show_controls();
+		var x = e.data.global.x;
+		x -= App.theme.padding;
+		x -= zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins);
+		var t1 = x / (this.sprite.width - zero_utilities__$Vec2_Vec2_$Impl_$.get_x(this.transport_margins) * 2);
+		x = (1 - t1) * 0 + t1;
+		this.video.currentTime = this.video.duration * x;
+	}
+	,play: function() {
+		this.video.play();
+		this.play_btn.alpha = 0;
+		this.pause_btn.alpha = 1;
+	}
+	,pause: function() {
+		this.temp_show_controls();
+		if(this.video.paused) {
+			this.play();
+			return;
+		}
+		this.set_pause();
+	}
+	,set_pause: function() {
+		this.video.pause();
+		this.play_btn.alpha = 1;
+		this.pause_btn.alpha = 0;
+	}
+	,mute: function() {
+		this.temp_show_controls();
+		this.video.muted = !this.video.muted;
+		this.update_mute_btns();
+	}
+	,update_mute_btns: function() {
+		this.mute_btn.visible = !this.video.muted;
+		this.unmute_btn.visible = this.video.muted;
+	}
+	,temp_show_controls: function() {
+		var _gthis = this;
+		if(this.timer != null) {
+			this.timer.cancel();
+		}
+		this.transport.alpha = 1;
+		this.timer = zero_utilities_Timer.get(2,function() {
+			return _gthis.transport.alpha = 0;
+		});
+	}
+	,destroy: function(options) {
+		this.video.pause();
+		this.video.remove();
+		PIXI.Container.prototype.destroy.call(this,options);
+	}
+});
 var themes_Legacy = $hx_exports["themes"]["Legacy"] = function() {
 	this.legacy = true;
 	this.margin = 24;
 	this.padding = 48;
-	this.fonts = ["Avenir Next","Avenir Next Medium","Avenir Next Demi","Avenir Next Bold"];
+	this.fonts = ["Avenir Nxt","Avenir Nxt Medium","Avenir Nxt Demi","Avenir Nxt Bold"];
 };
 themes_Legacy.__name__ = true;
 themes_Legacy.prototype = {
@@ -758,6 +1149,30 @@ themes_Legacy.prototype = {
 		resize(out,display);
 		util_ResizeUtil.resize_map.set(out,function() {
 			return resize(out,display);
+		});
+		out.alpha = 0;
+		zero_utilities_Timer.get(App.i.content_container.content_array.length * 0.2,function() {
+			return TweenMax.to(out,0.25,{ alpha : 1});
+		});
+		return out;
+	}
+	,load_video: function(src) {
+		var out = new objects_VideoPlayer(src);
+		util_ResizeUtil.resize_map.set(out,function() {
+			out.resize();
+			return;
+		});
+		out.alpha = 0;
+		zero_utilities_Timer.get(App.i.content_container.content_array.length * 0.2,function() {
+			return TweenMax.to(out,0.25,{ alpha : 1});
+		});
+		return out;
+	}
+	,load_audio: function(src) {
+		var out = new objects_AudioPlayer(src);
+		util_ResizeUtil.resize_map.set(out,function() {
+			out.resize();
+			return;
 		});
 		out.alpha = 0;
 		zero_utilities_Timer.get(App.i.content_container.content_array.length * 0.2,function() {
@@ -977,6 +1392,14 @@ themes_Simple.prototype = {
 		zero_utilities_Timer.get(App.i.content_container.content_array.length * 0.2,function() {
 			return TweenMax.to(out,0.25,{ alpha : 1});
 		});
+		return out;
+	}
+	,load_video: function(src) {
+		var out = new PIXI.Container();
+		return out;
+	}
+	,load_audio: function(src) {
+		var out = new PIXI.Container();
 		return out;
 	}
 	,load_paragraph: function(text) {
@@ -1221,7 +1644,7 @@ util_CardManager.validate_link = function(card,content) {
 	}
 };
 util_CardManager.error = function(card,content,message) {
-	console.log("src/util/CardManager.hx:104:","Error in card " + card.title + " - " + message + " \nContent: " + Std.string(content));
+	console.log("src/util/CardManager.hx:106:","Error in card " + card.title + " - " + message + " \nContent: " + Std.string(content));
 };
 var util_FlagManager = function() { };
 util_FlagManager.__name__ = true;
@@ -1273,6 +1696,7 @@ util_PointsManager.receive_pts = function(title,amt) {
 		_this1.h[title] = amt;
 	}
 	App.theme.load_points(amt);
+	BOBAPI.serve_score(amt);
 };
 util_PointsManager.get_total = function() {
 	var out = 0;
@@ -1387,6 +1811,61 @@ zero_utilities_Timer.prototype = {
 		this.cancel();
 	}
 };
+var zero_utilities__$Vec2_Vec2_$Impl_$ = {};
+zero_utilities__$Vec2_Vec2_$Impl_$.__name__ = true;
+zero_utilities__$Vec2_Vec2_$Impl_$.zero = function(n) {
+	if(Math.abs(n) <= zero_utilities__$Vec2_Vec2_$Impl_$.epsilon) {
+		return 0;
+	} else {
+		return n;
+	}
+};
+zero_utilities__$Vec2_Vec2_$Impl_$.from_array_float = function(input) {
+	return zero_utilities__$Vec2_Vec2_$Impl_$.get(input[0],input[1]);
+};
+zero_utilities__$Vec2_Vec2_$Impl_$.from_array_int = function(input) {
+	return zero_utilities__$Vec2_Vec2_$Impl_$.get(input[0],input[1]);
+};
+zero_utilities__$Vec2_Vec2_$Impl_$.get = function(x,y) {
+	if(y == null) {
+		y = 0;
+	}
+	if(x == null) {
+		x = 0;
+	}
+	if(zero_utilities__$Vec2_Vec2_$Impl_$.pool != null && zero_utilities__$Vec2_Vec2_$Impl_$.pool.length > 0) {
+		var this1 = zero_utilities__$Vec2_Vec2_$Impl_$.pool.shift();
+		var x1 = x;
+		var y1 = y;
+		if(y1 == null) {
+			y1 = 0;
+		}
+		if(x1 == null) {
+			x1 = 0;
+		}
+		this1[0] = zero_utilities__$Vec2_Vec2_$Impl_$.zero(x1);
+		this1[1] = zero_utilities__$Vec2_Vec2_$Impl_$.zero(y1);
+		return this1;
+	} else {
+		return zero_utilities__$Vec2_Vec2_$Impl_$._new(x,y);
+	}
+};
+zero_utilities__$Vec2_Vec2_$Impl_$._new = function(x,y) {
+	if(y == null) {
+		y = 0;
+	}
+	if(x == null) {
+		x = 0;
+	}
+	var this1 = [x,y];
+	return this1;
+};
+zero_utilities__$Vec2_Vec2_$Impl_$.get_x = function(this1) {
+	return this1[0];
+};
+zero_utilities__$Vec2_Vec2_$Impl_$.get_y = function(this1) {
+	return this1[1];
+};
 var $_;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $global.$haxeUID++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = m.bind(o); o.hx__closures__[m.__id__] = f; } return f; }
 $global.$haxeUID |= 0;
@@ -1398,17 +1877,17 @@ Object.defineProperty(js__$Boot_HaxeError.prototype,"message",{ get : function()
 	return String(this.val);
 }});
 js_Boot.__toStr = ({ }).toString;
-themes_Legacy.title_h = new PIXI.TextStyle({ fontFamily : "Avenir Next Demi", align : "center", fill : 16777215, fontSize : 24, wordWrap : true});
-themes_Legacy.title_sub = new PIXI.TextStyle({ fontFamily : "Avenir Next Bold", fontSize : 12, fill : 16777215, align : "center", letterSpacing : 4});
-themes_Legacy.title_p = new PIXI.TextStyle({ fontFamily : "Avenir Next Medium", align : "left", fill : 16777215, fontSize : 15, lineHeight : 24, wordWrap : true});
-themes_Legacy.p = new PIXI.TextStyle({ fontFamily : "Avenir Next Medium", align : "left", fill : 16777215, fontSize : 20, lineHeight : 28, wordWrap : true});
-themes_Legacy.quote = new PIXI.TextStyle({ fontFamily : "Avenir Next Demi", align : "left", fill : 16777215, fontSize : 20, lineHeight : 28, wordWrap : true});
-themes_Legacy.a = new PIXI.TextStyle({ fontFamily : "Avenir Next Medium", align : "left", fill : 3355443, fontSize : 18, lineHeight : 22, wordWrap : true, fontWeight : "600"});
-themes_Legacy.caption = new PIXI.TextStyle({ fontFamily : "Avenir Next Medium", align : "left", fill : 16777215, fontSize : 18, wordWrap : true});
+themes_Legacy.title_h = new PIXI.TextStyle({ fontFamily : "Avenir Nxt Demi", align : "center", fill : 16777215, fontSize : 24, wordWrap : true});
+themes_Legacy.title_sub = new PIXI.TextStyle({ fontFamily : "Avenir Nxt Bold", fontSize : 12, fill : 16777215, align : "center", letterSpacing : 4});
+themes_Legacy.title_p = new PIXI.TextStyle({ fontFamily : "Avenir Nxt Medium", align : "left", fill : 16777215, fontSize : 15, lineHeight : 24, wordWrap : true});
+themes_Legacy.p = new PIXI.TextStyle({ fontFamily : "Avenir Nxt Medium", align : "left", fill : 16777215, fontSize : 20, lineHeight : 28, wordWrap : true});
+themes_Legacy.quote = new PIXI.TextStyle({ fontFamily : "Avenir Nxt Demi", align : "left", fill : 16777215, fontSize : 20, lineHeight : 28, wordWrap : true});
+themes_Legacy.a = new PIXI.TextStyle({ fontFamily : "Avenir Nxt Medium", align : "left", fill : 3355443, fontSize : 18, lineHeight : 22, wordWrap : true, fontWeight : "600"});
+themes_Legacy.caption = new PIXI.TextStyle({ fontFamily : "Avenir Nxt Medium", align : "left", fill : 16777215, fontSize : 18, wordWrap : true});
 themes_Styles.text_main = new PIXI.TextStyle({ fill : 2105376, wordWrap : true, fontSize : 18});
 themes_Styles.text_button = new PIXI.TextStyle({ fill : 16777215, wordWrap : true, fontSize : 16});
 themes_Styles.text_textbox = new PIXI.TextStyle({ fill : 16777215, wordWrap : true, fontSize : 20});
-util_CardManager.content_types = ["paragraph","image","button","textbox","article","flag","points"];
+util_CardManager.content_types = ["paragraph","image","button","textbox","article","flag","points","video","audio"];
 util_CardManager.display_options = ["full-width","padded"];
 util_FlagManager.map = new haxe_ds_StringMap();
 util_LinkManager.move_threshold = 8;
@@ -1417,5 +1896,7 @@ util_ResizeUtil.resize_map = new haxe_ds_ObjectMap();
 zero_utilities_Timer.timers = [];
 zero_utilities_Timer.pool = [];
 zero_utilities_Timer.epsilon = 1e-8;
+zero_utilities__$Vec2_Vec2_$Impl_$.epsilon = 1e-8;
+zero_utilities__$Vec2_Vec2_$Impl_$.pool = [];
 App.main();
 })(typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : typeof self != "undefined" ? self : this, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
