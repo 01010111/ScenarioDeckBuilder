@@ -81,7 +81,7 @@ App.init = function(config,load) {
 	if(App.theme.fonts.length == 0) {
 		load_images();
 	} else {
-		WebFont.load({ custom : { families : zero_extensions_ArrayExt.remove_duplicates(zero_extensions_ArrayExt.merge(App.theme.fonts,["Avenir Next Demi","Avenir Next Bold"])), urls : ["../../common/fonts.css"]}, active : load_images, inactive : load_images});
+		WebFont.load({ custom : { families : zero_extensions_ArrayExt.remove_duplicates(zero_extensions_ArrayExt.merge(App.theme.fonts,["Avenir Next Demi","Avenir Next Bold"])), urls : ["../sd/include/fonts.css"]}, active : load_images, inactive : load_images});
 	}
 };
 App.get_theme = function(theme) {
