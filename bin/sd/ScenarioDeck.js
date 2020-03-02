@@ -938,10 +938,10 @@ objects_VideoPlayer.prototype = $extend(PIXI.Container.prototype,{
 	,make_mute_button: function() {
 		var _gthis = this;
 		this.mute_container = new PIXI.Container();
-		this.unmute_btn = PIXI.Sprite.fromImage("../../common/images/audio_muted.png");
+		this.unmute_btn = PIXI.Sprite.fromImage("assets/audio_muted.png");
 		this.unmute_btn.anchor.set(0.5);
 		this.unmute_btn.scale.set(0.5);
-		this.mute_btn = PIXI.Sprite.fromImage("../../common/images/audio_unmuted.png");
+		this.mute_btn = PIXI.Sprite.fromImage("assets/audio_unmuted.png");
 		this.mute_btn.anchor.set(0.5);
 		this.mute_btn.scale.set(0.5);
 		this.mute_container.addChild(this.unmute_btn);
